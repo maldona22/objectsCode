@@ -189,6 +189,7 @@ class Quad implements ICampusLocation {
   public boolean equals(ICampusLocation other) {
       if (other instanceof ICampusLocation) {
           // TODO fix this to be a proper equality function for the list "surroundings"
+          // Also think I fixed this one as well, need to test though
           return this.name.equals(((Quad)other).name) &&
                   this.surroundings.equals(((Quad)other).surroundings);
       }
