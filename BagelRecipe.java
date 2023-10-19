@@ -107,7 +107,26 @@ public class BagelRecipe {
     }
 
     // TODO figure out if this is returning volumes or weights???
+    // fuck it I'll just assume weights for now
     BagelRecipe(double flourVolume, double yeastVolume, double saltVolume) {
-        
+        double tempFlourWeight = convertFlourVolumeToWeight(flourVolume);
+        double tempYeastWeight = convertYeastVolumeToWeight(yeastVolume);
+        double tempSaltWeight = convertSaltVolumeToWeight(saltVolume);
+
+        if (Utils.doubleEquals(tempSaltWeight, (tempFlourWeight / 20.0) + yeastWeight, 0.001)) {
+            this.flourWeight = tempFlourWeight;
+            this.waterWeight = tempFlourWeight;
+            this.yeastWeight = tempYeastWeight;
+            this.maltWeight = tempYeastWeight;
+            this.saltWeight = tempSaltWeight;
+        }
+    }
+
+    boolean equals(BagelRecipe other) {
+        return Utils.doubleEquals(this.saltWeight, other.saltWeight, 0.001) &&
+                Utils.doubleEquals(this.flourWeight, other.flourWeight, 0.001) &&
+                Utils.doubleEquals(this.maltWeight, other.maltWeight, 0.001) &&
+                Utils.doubleEquals(this.waterWeight, other.waterWeight, 0.001) &&
+                Utils.doubleEquals(this.yeastWeight, other.yeastWeight, 0.001);
     }
 }
