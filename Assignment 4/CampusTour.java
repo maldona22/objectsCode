@@ -1,6 +1,6 @@
 // a campus tour
 
-class Utils {
+class UtilsCampus {
 
 }
 

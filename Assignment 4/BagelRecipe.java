@@ -1,4 +1,4 @@
-class Utils {
+class UtilsBagel {
     static boolean doubleEquals(double a, double b, double epsilon) {
         return Math.abs(a - b) < epsilon;
     }
@@ -54,7 +54,7 @@ public class BagelRecipe {
     BagelRecipe(double flourWeight, double waterWeight, double yeastWeight, double maltWeight, double saltWeight) {
         if (flourWeight == waterWeight) {
             if (yeastWeight == maltWeight) {
-                if (Utils.doubleEquals(saltWeight + yeastWeight, flourWeight / 20.0, 0.001)) {
+                if (UtilsBagel.doubleEquals(saltWeight + yeastWeight, flourWeight / 20.0, 0.001)) {
                     flourWeight = this.flourWeight;
                     waterWeight = this.waterWeight;
                     yeastWeight = this.yeastWeight;
@@ -123,10 +123,10 @@ public class BagelRecipe {
     }
 
     boolean equals(BagelRecipe other) {
-        return Utils.doubleEquals(this.saltWeight, other.saltWeight, 0.001) &&
-                Utils.doubleEquals(this.flourWeight, other.flourWeight, 0.001) &&
-                Utils.doubleEquals(this.maltWeight, other.maltWeight, 0.001) &&
-                Utils.doubleEquals(this.waterWeight, other.waterWeight, 0.001) &&
-                Utils.doubleEquals(this.yeastWeight, other.yeastWeight, 0.001);
+        return UtilsBagel.doubleEquals(this.saltWeight, other.saltWeight, 0.001) &&
+                UtilsBagel.doubleEquals(this.flourWeight, other.flourWeight, 0.001) &&
+                UtilsBagel.doubleEquals(this.maltWeight, other.maltWeight, 0.001) &&
+                UtilsBagel.doubleEquals(this.waterWeight, other.waterWeight, 0.001) &&
+                UtilsBagel.doubleEquals(this.yeastWeight, other.yeastWeight, 0.001);
     }
 }
