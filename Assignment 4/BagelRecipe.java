@@ -5,11 +5,11 @@ class UtilsBagel {
 }
 
 public class BagelRecipe {
-    private double flourWeight = 0.0;
-    private double waterWeight = 0.0;
-    private double yeastWeight = 0.0;
-    private double maltWeight = 0.0;
-    private double saltWeight = 0.0;
+    private double flourWeight;
+    private double waterWeight;
+    private double yeastWeight;
+    private double maltWeight;
+    private double saltWeight;
 
     void setFlourWeight(double weight) {
         flourWeight = weight;
@@ -55,11 +55,11 @@ public class BagelRecipe {
         if (flourWeight == waterWeight) {
             if (yeastWeight == maltWeight) {
                 if (UtilsBagel.doubleEquals(saltWeight + yeastWeight, flourWeight / 20.0, 0.001)) {
-                    flourWeight = this.flourWeight;
-                    waterWeight = this.waterWeight;
-                    yeastWeight = this.yeastWeight;
-                    maltWeight = this.maltWeight;
-                    saltWeight = this.saltWeight;
+                    this.flourWeight = flourWeight;
+                    this.waterWeight = waterWeight;
+                    this.yeastWeight = yeastWeight;
+                    this.maltWeight = maltWeight;
+                    this.saltWeight = saltWeight;
                 } else {
                     // TODO come up with better errors
                     throw new IllegalArgumentException("Invalid salt, yeast weight: Salt - " + saltWeight + " Yeast - " + yeastWeight);
@@ -78,7 +78,7 @@ public class BagelRecipe {
     BagelRecipe(double flourWeight, double yeastWeight) {
         double tempWaterWeight = flourWeight;
         double tempMaltWeight = yeastWeight;
-        double tempSaltWeight = (flourWeight / 20.0) + yeastWeight;
+        double tempSaltWeight = (flourWeight / 20.0) - yeastWeight;
         this.flourWeight = flourWeight;
         this.waterWeight = tempWaterWeight;
         this.yeastWeight = yeastWeight;
@@ -113,12 +113,15 @@ public class BagelRecipe {
         double tempYeastWeight = convertYeastVolumeToWeight(yeastVolume);
         double tempSaltWeight = convertSaltVolumeToWeight(saltVolume);
 
-        if (Utils.doubleEquals(tempSaltWeight, (tempFlourWeight / 20.0) + yeastWeight, 0.001)) {
+        if (UtilsBagel.doubleEquals(tempSaltWeight, (tempFlourWeight / 20.0) - tempYeastWeight, 0.001)) {
             this.flourWeight = tempFlourWeight;
             this.waterWeight = tempFlourWeight;
             this.yeastWeight = tempYeastWeight;
             this.maltWeight = tempYeastWeight;
             this.saltWeight = tempSaltWeight;
+        }
+        else {
+            throw new IllegalArgumentException();
         }
     }
 
@@ -128,5 +131,41 @@ public class BagelRecipe {
                 UtilsBagel.doubleEquals(this.maltWeight, other.maltWeight, 0.001) &&
                 UtilsBagel.doubleEquals(this.waterWeight, other.waterWeight, 0.001) &&
                 UtilsBagel.doubleEquals(this.yeastWeight, other.yeastWeight, 0.001);
+    }
+
+    void printRecipe() {
+        System.out.println("Flour weight: " + this.flourWeight);
+        System.out.println("Water weight: " + this.waterWeight);
+        System.out.println("Yeast weight: " + this.yeastWeight);
+        System.out.println("Malt weight: " + this.maltWeight);
+        System.out.println("Salt weight: " + this.saltWeight);
+    }
+
+    public static void main(String[] args) {
+        BagelRecipe test1 = new BagelRecipe(20, 20, 0.5, 0.5, 0.5);
+        System.out.println("Works fine?");
+        try {
+            BagelRecipe test2 = new BagelRecipe(21, 20, 0.5, 0.5, 0.5);
+        } catch (Exception IllegalArgumentException) {
+            System.out.println("Still working 1");
+        }
+
+        BagelRecipe test3 = new BagelRecipe(20, 0.5);
+
+        System.out.println("test1 recipe");
+        test1.printRecipe();
+        System.out.println("test3 recipe");
+        test3.printRecipe();
+
+        if (test3.equals(test1)) {
+            System.out.println("Still working 2");
+        }
+
+        try {
+            BagelRecipe test4 = new BagelRecipe(20, 1, 1);
+        } catch (Exception IllegalArgumentException) {
+            System.out.println("Nothing wrong yet");
+        }
+        
     }
 }

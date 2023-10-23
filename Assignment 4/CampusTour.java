@@ -211,11 +211,18 @@ class CampusTour {
 
   // is this tour the same tour as the given one?
   boolean sameTour(CampusTour other) {
-    return this.startTime == other.startTime &&
-            this.startingLocation.equals(other.startingLocation);
+      return this.startTime == other.startTime &&
+              this.startingLocation.equals(other.startingLocation);
+  }
+  
+public static void main(String[] args) {
+    
+    CampusTour testTour = new CampusTour(600, null)
   }
 }
 
 class ExamplesCampus {
-  // TODO: add examples + tests
+
+
+
 }

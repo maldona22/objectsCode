@@ -1,5 +1,3 @@
-
-
 class UtilsPolynomial {
     static ILoMonomial append(ILoMonomial left, ILoMonomial right) {
         if (left instanceof MtLoMonomial) {
