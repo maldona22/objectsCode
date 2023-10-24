@@ -115,13 +115,9 @@ class ConsLoMonomial implements ILoMonomial {
         if (other instanceof ConsLoMonomial) {
             if (this.first.equals(((ConsLoMonomial) other).first)) {
                 return this.rest.equals(((ConsLoMonomial) other).rest);
-            } else {
-                return false;
             }
         }
-        else {
-            return false;
-        }
+        return false;
     }
     /*
     public boolean equals(ILoMonomial other) {
@@ -198,7 +194,6 @@ public class Polynomial {
         System.out.println("Testing");
         printPoly(UtilsPolynomial.filterZeroCoefficients(testPoly1.monomials));
         printPoly(UtilsPolynomial.filterZeroCoefficients(testPoly2.monomials));
-        //printPoly(UtilsPolynomial.quickSortList(list2));
         System.out.println(testPoly1.equals(testPoly2));
     }
 }
