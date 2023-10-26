@@ -137,10 +137,10 @@ class UtilsPolynomial {
     }
 
     private static boolean checkForDuplicateDegrees(int prevDegree, IList<Monomial> list) {
-        if (list instanceof MtLoMonomial) {
+        if (list instanceof MtList<Monomial>) {
             return true;
         } else {
-            if (prevDegree != ((ConsLoMonomial) list).first.degree) {
+            if (prevDegree != ((ConsList<Monomial>) list).first.degree) {
                 return checkForDuplicateDegrees(((ConsList<Monomial>) list).first.degree, ((ConsList<Monomial>) list).rest);
             } else {
                 return false;
@@ -166,60 +166,6 @@ class Monomial {
             throw new IllegalArgumentException();
         }
     }
-}
-
-interface ILoMonomial {
-    boolean equals(ILoMonomial other);
-}
-
-class MtLoMonomial implements ILoMonomial {
-    public boolean equals(ILoMonomial other) {
-        return (other instanceof MtLoMonomial);
-    }
-}
-
-class ConsLoMonomial implements ILoMonomial {
-    Monomial first;
-    ILoMonomial rest;
-
-    ConsLoMonomial(Monomial first, ILoMonomial rest) {
-        this.first = first;
-        this.rest = rest;
-    }
-
-    public boolean equals(ILoMonomial other) {
-        if (other instanceof ConsLoMonomial) {
-            if (this.first.equals(((ConsLoMonomial) other).first)) {
-                return this.rest.equals(((ConsLoMonomial) other).rest);
-            }
-        }
-        return false;
-    }
-    /*
-    public boolean equals(ILoMonomial other) {
-        if (other instanceof ConsLoMonomial) {
-            if (this.first.equals(((ConsLoMonomial)other).first)) {
-                if ( (((ConsLoMonomial)other).rest instanceof ConsLoMonomial) && 
-                    (this.rest instanceof ConsLoMonomial)) {
-                    return ((ConsLoMonomial)this.rest).equals(((ConsLoMonomial)other).rest);
-                }
-                else if ( (((ConsLoMonomial)other).rest instanceof MtLoMonomial) && 
-                        (this.rest instanceof MtLoMonomial)) {
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }
-            else {
-                return false;
-            }
-        }
-        else {
-            return false;
-        }       
-    }
-    */
 }
 
 public class Polynomial {
@@ -269,7 +215,7 @@ public class Polynomial {
         printPoly(list2);
         System.out.println("Testing");
         printPoly(testPoly1.monomials.filter(new EqualToCoefficient(0)));
-        printPoly(UtilsPolynomial.filterZeroCoefficients(testPoly2.monomials.filter));
+        printPoly(testPoly2.monomials.filter(new EqualToCoefficient(0)));
         System.out.println(testPoly1.equals(testPoly2));
     }
 }
