@@ -1,7 +1,99 @@
 // a campus tour
+interface IPred<T> {
+    boolean apply(T t);
+}
 
-class UtilsCampus {
+interface IList<T> {
+    IList<T> filter(IPred<T> pred);
 
+    IList<T> append(IList<T> list);
+
+    IList<T> append(T element);
+
+    boolean equals(IList<T> list);
+
+    boolean equalsCons(ConsList<T> list);
+
+    boolean equalsMt(MtList<T> list);
+
+    int length();
+}
+    
+class MtList<T> implements IList<T> {
+    public IList<T> filter(IPred<T> pred) {
+        return this;
+    }
+
+    public IList<T> append(IList<T> list) {
+        return list;
+    }
+
+    public IList<T> append(T element) {
+        return new ConsList<T>(element, new MtList<T>());
+    }
+
+    public int length() {
+        return 0;
+    }
+
+    public boolean equals(IList<T> list) {
+        return list.equalsMt(this);
+    }
+
+    public boolean equalsMt(MtList<T> list) {
+        return true;
+    }
+
+    public boolean equalsCons(ConsList<T> list) {
+        return false;
+    }
+}
+
+class ConsList<T> implements IList<T> {
+    T first;
+    IList<T> rest;
+
+    ConsList(T first, IList<T> rest) {
+        this.first = first;
+        this.rest = rest;
+    }
+
+    public boolean equals(IList<T> list) {
+        return list.equalsCons(this);
+    }
+
+    public boolean equalsMt(MtList<T> list) {
+        return false;
+    }
+
+    public boolean equalsCons(ConsList<T> list) {
+        if (this.first.equals(list.first)) {
+            return this.rest.equals(list.rest);
+        }
+        else {
+            return false;
+        }
+    }
+    
+    public IList<T> filter(IPred<T> pred) {
+        if (pred.apply(this.first)) {
+            return new ConsList<T>(this.first, this.rest.filter(pred));
+        } else {
+            return this.rest.filter(pred);
+        }
+    }
+    
+    public IList<T> append(IList<T> list) {
+        return new ConsList<T>(first, rest.append(list));
+    }
+
+    public IList<T> append(T element) {
+        return new ConsList<T>(first, new ConsList<T>(element, new MtList<T>()));
+    }
+
+    public int length() {
+        return 1 + this.rest.length();
+    }
 }
 
 class Address {
@@ -21,6 +113,10 @@ class Address {
 
 interface ICampusLocation {
     boolean equals(ICampusLocation other);
+
+    boolean equalsBuilding(Building other);
+
+    boolean equalsQuad(Quad other);
 }
 
 class Building implements ICampusLocation {
@@ -33,19 +129,26 @@ class Building implements ICampusLocation {
     }
 
     public boolean equals(ICampusLocation other) {
-        if (other instanceof Building) {
-            return this.name.equals(((Building)other).name) &&
-                this.address.equals(((Building)other).address);
-        }
-        else {
-            return false;
-        }
+        return other.equalsBuilding(this);
+    }
+
+    public boolean equalsBuilding(Building other) {
+        return this.name.equals(other.name) &&
+                this.address.equals(other.address);
+    }
+
+    public boolean equalsQuad(Quad other) {
+        return false;
     }
 }
 
 // a spot on the tour
 interface ITourLocation {
     boolean equals(ITourLocation other);
+
+    boolean equalsITourLocation(ITourLocation other);
+
+    boolean equalsATourLocaton(ATourLocation other);
 }
 
 abstract class ATourLocation implements ITourLocation {
@@ -56,13 +159,22 @@ abstract class ATourLocation implements ITourLocation {
     }
 
     abstract public boolean equals(ATourLocation other);
+
+    abstract public boolean equalsTourEnd(TourEnd other);
+
+    abstract public boolean equalsMandatory(Mandatory other);
+
+    abstract public boolean equalsBranchingTour(BranchingTour other);
     
+    public boolean equalsITourLocation(ITourLocation other) {
+        return false;
+    }
+
+    public boolean equalsATourLocaton(ATourLocation other) {
+        return this.equals(other);
+    }
     public boolean equals(ITourLocation other) {
-        if (other instanceof ATourLocation) {
-            return this.equals((ATourLocation)other);
-        } else {
-            return false;
-        }
+        return other.equalsATourLocaton(this);
     }
 }
 
@@ -74,14 +186,22 @@ class TourEnd extends ATourLocation {
       super(speech);
       this.location = location;
   }
-  
+
   public boolean equals(ATourLocation other) {
-      if (other instanceof TourEnd) {
-          return this.speech.equals(other.speech) &&
-                  this.location.equals(((TourEnd) other).location);
-      } else {
-          return false;
-      }
+      return other.equalsTourEnd(this);
+  }
+  
+  public boolean equalsTourEnd(TourEnd other) {
+      return this.speech.equals(other.speech) &&
+              this.location.equals(other.location);
+  }
+  
+  public boolean equalsMandatory(Mandatory other) {
+      return false;
+  }
+
+  public boolean equalsBranchingTour(BranchingTour other) {
+      return false;
   }
 }
 
@@ -97,20 +217,24 @@ class Mandatory extends ATourLocation {
   }
 
   public boolean equals(ATourLocation other) {
-      if (other instanceof Mandatory) {
-          return this.location.equals(((Mandatory) other).location) &&
-                  this.next.equals(((Mandatory) other).next) &&
-                  this.speech.equals(other.speech);
-      }
-      else {
-          return false;
-    }
+      return other.equalsMandatory(this);
+  }
+
+  public boolean equalsMandatory(Mandatory other) {
+      return this.location.equals(other.location) &&
+              this.next.equals(other.next) &&
+              this.speech.equals(other.speech);
+  }
+  
+  public boolean equalsTourEnd(TourEnd other) {
+      return false;
+  }
+
+  public boolean equalsBranchingTour(BranchingTour other) {
+      return false;
   }
 }
 
-// up to the tour guide where to go next
-// TODO fix so that the order of option 1 and option 2 is arbitary
-// I think I fixed the todo, need to test it to be sure
 class BranchingTour extends ATourLocation {
     ITourLocation option1;
     ITourLocation option2;
@@ -122,88 +246,49 @@ class BranchingTour extends ATourLocation {
     }
 
     public boolean equals(ATourLocation other) {
-        if (other instanceof BranchingTour) {
-            if (this.option1.equals(((BranchingTour) other).option1)) {
-                return this.option2.equals(((BranchingTour) other).option2);
-            }
-            else {
-                if (this.option1.equals(((BranchingTour) other).option2)) {
-                    return this.option2.equals(((BranchingTour) other).option1);
-                }
-                else {
-                    return false;
-                }
-            }
-        }
-        else {
-            return false;
-        }
-    }
-}
-
-interface ILoCampusLocation {
-    boolean equals(ILoCampusLocation other);
-}
-
-class MtLoCampusLocation implements ILoCampusLocation {
-    public boolean equals(ILoCampusLocation other) {
-        return other instanceof MtLoCampusLocation;
-    }
-}
-
-class ConsLoCampusLocation implements ILoCampusLocation {
-    ICampusLocation first;
-    ILoCampusLocation rest;
-
-    ConsLoCampusLocation(ICampusLocation first, ILoCampusLocation rest) {
-        this.first = first;
-        this.rest = rest;
+        return other.equalsBranchingTour(this);
     }
 
-    public boolean equals(ILoCampusLocation other) {
-        if (other instanceof ConsLoCampusLocation) {
-            if (this.first.equals(((ConsLoCampusLocation)other).first)) {
-                if ( (((ConsLoCampusLocation)other).rest instanceof ConsLoCampusLocation) && 
-                    (this.rest instanceof ConsLoCampusLocation)) {
-                    return this.rest.equals(((ConsLoCampusLocation)other).rest);
-                }
-                else if ( (((ConsLoCampusLocation)other).rest instanceof MtLoCampusLocation) && 
-                        (this.rest instanceof MtLoCampusLocation)) {
-                    return true;
-                }
-                else {
-                    return false;
-                }
-            }
-            else {
-                return false;
+    public boolean equalsMandatory(Mandatory other) {
+        return false;
+    }
+
+    public boolean equalsTourEnd(TourEnd other) {
+        return false;
+    }
+
+    public boolean equalsBranchingTour(BranchingTour other) {
+        if (this.option1.equals(other.option1)) {
+            return this.option2.equals(other.option2);
+        } else {
+            if (this.option1.equals(other.option2)) {
+                return this.option2.equals(other.option1);
             }
         }
-        else {
-            return false;
-        }       
+        return false;
     }
 }
 
 class Quad implements ICampusLocation {
   String name;
-  ILoCampusLocation surroundings; // in clockwise order, starting north
+  IList<ICampusLocation> surroundings; // in clockwise order, starting north
 
-  Quad(String name, ILoCampusLocation surroundings) {
+  Quad(String name, IList<ICampusLocation> surroundings) {
       this.name = name;
       this.surroundings = surroundings;
   }
 
   public boolean equals(ICampusLocation other) {
-      if (other instanceof ICampusLocation) {
-          // TODO fix this to be a proper equality function for the list "surroundings"
-          // Also think I fixed this one as well, need to test though
-          return this.name.equals(((Quad)other).name) &&
-                  this.surroundings.equals(((Quad)other).surroundings);
-      }
-      else {
-          return false;
-    }
+      return other.equalsQuad(this);
+  }
+
+  public boolean equalsQuad(Quad other) {
+      return this.name.equals(other.name) &&
+              this.surroundings.equals(other.surroundings);
+  }
+  
+  public boolean equalsBuilding(Building other) {
+      return false;
   }
 }
 
@@ -232,7 +317,6 @@ class ExamplesCampus {
     public static void main(String[] args) {
         // TODO: add tests
         //Examples Address
-        MtLoCampusLocation empty = new MtLoCampusLocation();
         Address setonHall = new Address("South Orange Ave", 400);
 
         Address jubileeHallAddress = new Address("South Orange Ave", 395);
@@ -254,10 +338,10 @@ class ExamplesCampus {
         
         //Examples Quad
         Quad quad1Order1 = new Quad("Buildings around Duffy Hall",
-                new ConsLoCampusLocation(dunkin, new ConsLoCampusLocation(rec, new MtLoCampusLocation())));
+                new ConsList<ICampusLocation>(dunkin, new ConsList<ICampusLocation>(rec, new MtList<ICampusLocation>())));
         Quad quad1Order2 = new Quad("Buildings around Duffy Hall",
-                new ConsLoCampusLocation(rec, new ConsLoCampusLocation(dunkin, new MtLoCampusLocation())));
-        Quad quad2 = new Quad("Buildings around McNulty Hall", new ConsLoCampusLocation(jubilee, new ConsLoCampusLocation(boland, new ConsLoCampusLocation(studentCenter, new MtLoCampusLocation()))));
+                new ConsList<ICampusLocation>(rec, new ConsList<ICampusLocation>(dunkin, new MtList<ICampusLocation>())));
+        Quad quad2 = new Quad("Buildings around McNulty Hall", new ConsList<ICampusLocation>(jubilee, new ConsList<ICampusLocation>(boland, new ConsList<ICampusLocation>(studentCenter, new MtList<ICampusLocation>()))));
         //Examples ToursEnd
         TourEnd endTour1 = new TourEnd("McNulty Hall is the last spot on the tour", quad2);
         TourEnd endTour2 = new TourEnd("The Student Center is the last spot on our tour", studentCenter);
