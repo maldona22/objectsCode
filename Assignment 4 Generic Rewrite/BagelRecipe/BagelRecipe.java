@@ -1,56 +1,51 @@
+import tester.Tester;
+
+// Utility functions
 class UtilsBagel {
+    /* Template
+     * 
+     * Fields:
+     * 
+     * Methods:
+     * UtilsBagel.doubleEquals(double a, double b, double epsilon) -- boolean
+     * 
+     * Methods of fields:
+     * 
+     */
     static boolean doubleEquals(double a, double b, double epsilon) {
         return Math.abs(a - b) < epsilon;
     }
 }
 
+// Creates a perfect recipe to bake a bagel with
 public class BagelRecipe {
-    private double flourWeight;
-    private double waterWeight;
-    private double yeastWeight;
-    private double maltWeight;
-    private double saltWeight;
+    /* Template:
+     *
+     * Fields:
+     * this.flourWeight -- double
+     * this.waterWeight -- double
+     * this.yeastWeight -- double
+     * this.maltWeight -- double
+     * this.saltWeight -- double
+     * 
+     * Methods:
+     * this.convertFlourVolumeToWeight(double cups) -- double
+     * this.convertWaterVolumeToWeight(double cups) -- double
+     * this.convertYeastVolumeToWeight(double teaspoons) -- double
+     * this.convertSaltVolumeToWeight(double teaspoons) -- double
+     * this.convertMaltVolumeToWeight(double teaspoons) --double
+     * this.sameRecipe(BagelRecipe other) -- boolean
+     * 
+     * Methods of fields:
+     *  
+    */
+    double flourWeight;
+    double waterWeight;
+    double yeastWeight;
+    double maltWeight;
+    double saltWeight;
 
-    void setFlourWeight(double weight) {
-        flourWeight = weight;
-    }
-
-    double getFlourWeight() {
-        return flourWeight;
-    }
-
-    void setWaterWeight(double weight) {
-        waterWeight = weight;
-    }
-
-    double getWaterWeight() {
-        return waterWeight;
-    }
-
-    void setYeastWeight(double weight) {
-        yeastWeight = weight;
-    }
-
-    double getYeastWeight() {
-        return yeastWeight;
-    }
-
-    void setMaltWeight(double weight) {
-        maltWeight = weight;
-    }
-
-    double getMaltWeight() {
-        return maltWeight;
-    }
-
-    void setSaltWeight(double weight) {
-        saltWeight = weight;
-    }
-
-    double getSaltWeight() {
-        return saltWeight;
-    }
-
+    // Constructor given the weight of every ingredient within the BagelRecipe
     BagelRecipe(double flourWeight, double waterWeight, double yeastWeight, double maltWeight, double saltWeight) {
         if (flourWeight == waterWeight) {
             if (yeastWeight == maltWeight) {
@@ -61,20 +56,17 @@ public class BagelRecipe {
                     this.maltWeight = maltWeight;
                     this.saltWeight = saltWeight;
                 } else {
-                    // TODO come up with better errors
-                    throw new IllegalArgumentException("Invalid salt, yeast weight: Salt - " + saltWeight + " Yeast - " + yeastWeight);
+                    throw new IllegalArgumentException("Imperfect Bagel Recipe");
                 }
             } else {
-                // TODO come up with better errors
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Imperfect Bagel Recipe");
             }
-        }
-        else {
-            // TODO come up with better errors
-            throw new IllegalArgumentException();
+        } else {
+            throw new IllegalArgumentException("Imperfect Bagel Recipe");
         }
     }
-    
+
+    // Constructor given only the weight of flour and the weight of yeast
     BagelRecipe(double flourWeight, double yeastWeight) {
         double tempWaterWeight = flourWeight;
         double tempMaltWeight = yeastWeight;
@@ -86,14 +78,17 @@ public class BagelRecipe {
         this.saltWeight = tempSaltWeight;
     }
 
+    // Converts a volume of flour in cups to its weight in ounces
     double convertFlourVolumeToWeight(double cups) {
         return cups * 4.25;
     }
 
+    // Converts a volume of water in cups to its weight in ounces
     double convertWaterVolumeToWeight(double cups) {
         return cups * 8;
     }
 
+    // Converts a volume of yeast in teaspoons to its weight in ounces
     double convertYeastVolumeToWeight(double teaspoons) {
         return (teaspoons / 48.0) * 5.0;
     }
@@ -102,30 +97,32 @@ public class BagelRecipe {
         return (teaspoons / 48.0) * 10.0;
     }
 
+    // Converts a volume of malt in teaspoons to its weight in ounces
     double convertMaltVolumeToWeight(double teaspoons) {
         return (teaspoons / 48.0) * 11.0;
     }
 
-    // TODO figure out if this is returning volumes or weights???
-    // fuck it I'll just assume weights for now
+    // Constructor given volume of flour in cups, and yeast and salt in teaspoons
     BagelRecipe(double flourVolume, double yeastVolume, double saltVolume) {
+        // Conversions to weight from volume:
         double tempFlourWeight = convertFlourVolumeToWeight(flourVolume);
         double tempYeastWeight = convertYeastVolumeToWeight(yeastVolume);
         double tempSaltWeight = convertSaltVolumeToWeight(saltVolume);
 
+        // Verify that this is a valid BagelRecipe
         if (UtilsBagel.doubleEquals(tempSaltWeight, (tempFlourWeight / 20.0) - tempYeastWeight, 0.001)) {
             this.flourWeight = tempFlourWeight;
             this.waterWeight = tempFlourWeight;
             this.yeastWeight = tempYeastWeight;
             this.maltWeight = tempYeastWeight;
             this.saltWeight = tempSaltWeight;
-        }
-        else {
-            throw new IllegalArgumentException();
+        } else {
+            throw new IllegalArgumentException("Imperfect Bagel Recipe");
         }
     }
 
-    boolean equals(BagelRecipe other) {
+    // Computes if the other BagelRecipes is the same as this BagelRecipe within a plus minus of 0.001
+    boolean sameRecipe(BagelRecipe other) {
         return UtilsBagel.doubleEquals(this.saltWeight, other.saltWeight, 0.001) &&
                 UtilsBagel.doubleEquals(this.flourWeight, other.flourWeight, 0.001) &&
                 UtilsBagel.doubleEquals(this.maltWeight, other.maltWeight, 0.001) &&
@@ -133,39 +130,49 @@ public class BagelRecipe {
                 UtilsBagel.doubleEquals(this.yeastWeight, other.yeastWeight, 0.001);
     }
 
-    void printRecipe() {
-        System.out.println("Flour weight: " + this.flourWeight);
-        System.out.println("Water weight: " + this.waterWeight);
-        System.out.println("Yeast weight: " + this.yeastWeight);
-        System.out.println("Malt weight: " + this.maltWeight);
-        System.out.println("Salt weight: " + this.saltWeight);
+}
+
+class ExamplesBagelRecipe {
+    BagelRecipe bagel1 = new BagelRecipe(10, 10, 0.25, 0.25, 0.25);
+    BagelRecipe bagel2 = new BagelRecipe(10, 0.25);
+    BagelRecipe bagel3 = new BagelRecipe(20, 0.5);
+
+    boolean testSameRecipe(Tester t) {
+        return t.checkExpect(bagel2.sameRecipe(bagel1), true) &&
+                t.checkExpect(bagel1.sameRecipe(bagel3), false);
     }
 
-    public static void main(String[] args) {
-        BagelRecipe test1 = new BagelRecipe(20, 20, 0.5, 0.5, 0.5);
-        System.out.println("Works fine?");
-        try {
-            BagelRecipe test2 = new BagelRecipe(21, 20, 0.5, 0.5, 0.5);
-        } catch (Exception IllegalArgumentException) {
-            System.out.println("Still working 1");
-        }
+    boolean testImperfectBagelRecipe(Tester t) {
+        return t.checkConstructorException(new IllegalArgumentException("Imperfect Bagel Recipe"), "BagelRecipe",
+                new BagelRecipe(10, 20, 30)) &&
+                t.checkConstructorException(new IllegalArgumentException("Imperfect Bagel Recipe"), "BagelRecipe",
+                        new BagelRecipe(0.5, 10, 0.5, 10, 0.5))
+                &&
+                t.checkConstructorException(new IllegalArgumentException("Imperfect Bagel Recipe"), "BagelRecipe",
+                        new BagelRecipe(30, 0.23));
+    }
 
-        BagelRecipe test3 = new BagelRecipe(20, 0.5);
+    boolean testDoubleEquals(Tester t) {
+        return t.checkExpect(UtilsBagel.doubleEquals(1.0001, 1.0, 0.001), true);
+    }
 
-        System.out.println("test1 recipe");
-        test1.printRecipe();
-        System.out.println("test3 recipe");
-        test3.printRecipe();
+    boolean testConvertFlourVolumeToWeight(Tester t) {
+        return t.checkInexact(bagel1.convertFlourVolumeToWeight(2), 8.25, 0.001);
+    }
 
-        if (test3.equals(test1)) {
-            System.out.println("Still working 2");
-        }
+    boolean testConvertWaterVolumeToWeight(Tester t) {
+        return t.checkInexact(bagel1.convertWaterVolumeToWeight(2), 16.0, 0.001);
+    }
 
-        try {
-            BagelRecipe test4 = new BagelRecipe(20, 1, 1);
-        } catch (Exception IllegalArgumentException) {
-            System.out.println("Nothing wrong yet");
-        }
-        
+    boolean testConvertYeastVolumeToWeight(Tester t) {
+        return t.checkInexact(bagel1.convertYeastVolumeToWeight(2), 0.208333, 0.001);
+    }
+
+    boolean testConvertSaltVolumeToWeight(Tester t) {
+        return t.checkInexact(bagel1.convertSaltVolumeToWeight(2), 0.416667, 0.001);
+    }
+
+    boolean testConvertMaltVolumeToWeight(Tester t) {
+        return t.checkInexact(bagel1.convertMaltVolumeToWeight(2), 0.458333, 0.001);
     }
 }
