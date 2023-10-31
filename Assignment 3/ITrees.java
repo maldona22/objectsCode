@@ -332,7 +332,6 @@ class testing {
     WorldScene s = new WorldScene(500, 500);
     ITree TREE1 = new Branch(30, 30, 135, 40, new Leaf(10, Color.RED), new Leaf(15, Color.BLUE));
     ITree TREE2 = new Branch(30, 30, 115, 65, new Leaf(15, Color.GREEN), new Leaf(8, Color.ORANGE));
-
     c.drawScene(s.placeImageXY(TREE1.draw(), 250, 250));
     //c.drawScene(s.placeImageXY(TREE1.combine(40, 50, 150, 30, TREE2).draw(), 250, 250));
     //c.drawScene(s.placeImageXY((new Branch(40, 50, 150, 30, TREE1, TREE2)).draw(), 250, 250));

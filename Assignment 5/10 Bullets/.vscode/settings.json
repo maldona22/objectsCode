@@ -1,0 +1,7 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "c:\\Users\\maldona2\\OneDrive - Seton Hall University\\Documents\\GitHub\\objectsCode\\tester.jar",
+        "c:\\Users\\maldona2\\OneDrive - Seton Hall University\\Documents\\GitHub\\objectsCode\\javalib.jar"
+    ]
+}
