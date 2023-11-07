@@ -334,16 +334,21 @@ class ConstProps {
     static final Color shipColor = new Color(0, 0, 255);
     static final int shipRadius = (worldHeight / 30);
     static final double shipSpeed = (bulletSpeed / 2.0);
+    static final double shipVelocityLeft = -shipSpeed;
+    static final double shipVelocityRight = shipSpeed;
+    static final double shipSpawnLocationYMin = worldHeight / 7;
+    static final double shipSpawnLocationYMax = worldHeight - shipSpawnLocationYMin;
+
     static final Color fontColor = new Color(255, 255, 255);
     static final int fontSize = 13;
     static final int playerRadius = 25;
     static final CartesianVector initialPlayerStartingPoint = new CartesianVector(worldWidth / 2.0, worldHeight);
     static final double tickRate = 1.0 / 28.0;
-    static final int shipSpawnRate = (int)(1 / tickRate);
+    static final int shipSpawnRate = (int) (1 / tickRate);
     static final int minimumShipsSpawned = 1;
     static final int maximumShipsSpawned = 3;
 
-    static final PolarVector vectorToPlayerPos = new PolarVector(null, null);
+    static final PolarVector vectorToPlayerPos = new PolarVector(300, Math.PI / 4);
 
     // TODO change the default alien image
     static final WorldImage alienImage = new CircleImage(ConstProps.shipRadius, OutlineMode.SOLID,
@@ -351,29 +356,30 @@ class ConstProps {
     // TODO change the default player image
     static final WorldImage playerImage = new CircleImage(ConstProps.playerRadius, OutlineMode.SOLID,
             new Color(0, 255, 0));
-
+    /* 
     static final PolarVector translateToJavaLibCoords(PolarVector vector) {
         // TODO figure out what the translation amount for r and theta is
     }
+    */
     
     //static final WorldImage bulletImage = new CircleImage(ConstProps.initialBulletRadius, OutlineMode.SOLID, new Color(255, 0, 0));
 }
-// Only ever need to keep track of 3 vectors max for any given bullet
+    // Only ever need to keep track of 3 vectors max for any given bullet
 class PolarVector implements Vector {
     double rComponent;
     double thetaComponent;
     //Coordinate startPoint;
-
+    
     PolarVector(double rComponent, double thetaComponent) {
         this.rComponent = rComponent;
         this.thetaComponent = thetaComponent;
         //this.startPoint = startPoint;
     }
-
+    
     CartesianVector convertToCartesian() {
         return new CartesianVector(rComponent * Math.cos(thetaComponent), rComponent * Math.sin(thetaComponent));
     }
-
+    
     double distanceBetweenPoints(CartesianVector a) {
         //distance formula
         CartesianVector converted = this.convertToCartesian();
@@ -381,36 +387,23 @@ class PolarVector implements Vector {
                 Math.pow(a.xComponent - converted.xComponent, 2) + Math.pow(a.yComponent - converted.yComponent, 2));
     }
 }
-
+    
 class CartesianVector implements Vector {
     double xComponent;
     double yComponent;
     //Coordinate startPoint;
-
+    
     CartesianVector(double xComponent, double yComponent) {
         this.xComponent = xComponent;
         this.yComponent = yComponent;
     }
 }
-
-abstract class NPC {
-    /*
-     Coordinate coords;
     
-    NPC(Coordinate coords) {
-        this.coords = coords;
-    }
-     */
+abstract class NPC {
 
-    // Might change this to be specific with just aliens, since we can keep them in a separate list
-    // double dispatch might not be necessary
-    //abstract boolean collidedWith(NPC other);
-
-    //abstract boolean collidedWithAlien(Alien other);
-
-    //abstract boolean collidedWithBullet(Bullet other);
 }
 
+// TODO just fix the bullets in general
 class Bullet extends NPC {
     // Doesn't cap? Appears to at times but always seems to get larger, most I've gotten was 25
     // Determines the number of bullets that are released by killed alien
@@ -424,10 +417,11 @@ class Bullet extends NPC {
     PolarVector startPositionVector;
     PolarVector currentPositionVector;
 
-    Bullet(PolarVector velocityVector, PolarVector coords, int multiplier) {
+    Bullet(PolarVector coords, PolarVector velocityVector, PolarVector startPositionPolarVector, int multiplier) {
         this.velocityVector = velocityVector;
         this.coords = coords;
         this.multiplier = multiplier;
+        this.startPositionVector = startPositionPolarVector;
     }
 
     PolarVector getCurrentPosPolar() {
@@ -436,9 +430,9 @@ class Bullet extends NPC {
     }
 
     Bullet onTickUpdateCoords() {
-        PolarVector newCurrentPositionVector = new PolarVector(currentPositionVector.rComponent + velocityVector.rComponent,
-                currentPositionVector.thetaComponent);
-        return new Bullet(velocityVector, addPolarVectors(addPolarVectors(ConstProps.vectorToPlayerPos, startPositionVector), newCurrentPositionVector), multiplier);
+        PolarVector newCoords = new PolarVector(coords.rComponent + velocityVector.rComponent,
+                coords.thetaComponent);
+        return new Bullet(addPolarVectors(addPolarVectors(ConstProps.vectorToPlayerPos, startPositionVector), newCoords), velocityVector, startPositionVector ,multiplier);
     }
     
     PolarVector addPolarVectors(PolarVector a, PolarVector b) {
@@ -449,8 +443,9 @@ class Bullet extends NPC {
     IList<Bullet> multiplyHelper(int multipler, double angleOffset, int loop) {
         if (loop != 0) {
             return new ConsList<Bullet>(
-                    new Bullet(new PolarVector(ConstProps.bulletSpeed, angleOffset * loop),
-                            getCurrentPosPolar(),
+                    new Bullet(getCurrentPosPolar(),
+                    new PolarVector(ConstProps.bulletSpeed, angleOffset * loop),
+                           startPositionVector, 
                             multipler + 1),
                     multiplyHelper(multipler, angleOffset, loop - 1));
         } else {
@@ -654,17 +649,39 @@ class BulletMultiplyCombin implements Combinator<Bullet, IList<Bullet>> {
 }
 
 class AppendCombin implements Combinator<IList<Pair<Bullet, Alien>>, IList<Pair<Bullet, Alien>>> {
-        public IList<Pair<Bullet, Alien>> apply(IList<Pair<Bullet, Alien>> list, IList<Pair<Bullet, Alien>> accum) {
-            return list.append(accum);
-        }
+    public IList<Pair<Bullet, Alien>> apply(IList<Pair<Bullet, Alien>> list, IList<Pair<Bullet, Alien>> accum) {
+        return list.append(accum);
     }
+}
+
+class BulletOnScreenPred implements IPred<Bullet> {
+    public boolean apply(Bullet bullet) {
+        CartesianVector currentPos = bullet.getCurrentPosPolar().convertToCartesian();
+        // TODO account for the radius of the bullet here
+        Boolean OnScreenX = (currentPos.xComponent <= ConstProps.RIGHT_EDGE)
+                || (currentPos.xComponent >= ConstProps.LEFT_EDGE);
+        Boolean OnScreeny = (currentPos.yComponent <= ConstProps.BOTTOM_EDGE)
+                || (currentPos.yComponent >= ConstProps.TOP_EDGE);
+        return (OnScreenX || OnScreeny);
+    }
+}
+
+class AlienOnScreenPred implements IPred<Alien> {
+    public boolean apply(Alien alien) {
+        CartesianVector currentPos = alien.coords;
+        // TODO account for the radius of the alien here
+        Boolean OnScreenX = (currentPos.xComponent <= ConstProps.RIGHT_EDGE) || (currentPos.xComponent >= ConstProps.LEFT_EDGE);
+        Boolean OnScreeny = (currentPos.yComponent <= ConstProps.BOTTOM_EDGE) || (currentPos.yComponent >= ConstProps.TOP_EDGE);
+        return (OnScreenX || OnScreeny);
+    }
+}
 
 class NBulletsWorld extends World {
     int playerBulletsLeft;
     int shipSpawnTimer;
     Random rng;
 
-    NBulletsWorld(int numberOfBullets, int shipSpawnTimer, Random randomNumberGenerator, WorldScene scene, IList<Bullet> bullets, IList<Alien> aliens) {
+    NBulletsWorld(int numberOfBullets, int shipSpawnTimer, Random randomNumberGenerator, CollisionProcessing collisionProcessing, WorldScene scene, IList<Bullet> bullets, IList<Alien> aliens) {
         if (numberOfBullets > 0) {
             this.playerBulletsLeft = numberOfBullets;
             this.worldScene = scene;
@@ -672,26 +689,24 @@ class NBulletsWorld extends World {
             this.aliens = aliens;
             this.shipSpawnTimer = shipSpawnTimer;
             this.rng = randomNumberGenerator;
+            this.collisionProcessing = collisionProcessing;
         } else {
             throw new IllegalArgumentException();
         }
     }
 
     NBulletsWorld(int numberOfBullets, Random randomNumberGenerator) {
-        this(numberOfBullets, 0, randomNumberGenerator, new WorldScene(ConstProps.worldWidth, ConstProps.worldHeight),
+        this(numberOfBullets, 0, randomNumberGenerator, new CollisionProcessing(), new WorldScene(ConstProps.worldWidth, ConstProps.worldHeight),
                 new MtList<Bullet>(), new MtList<Alien>());
     }
     
     NBulletsWorld(int numberOfBullets) {
-        this(numberOfBullets, 0, new Random(), new WorldScene(ConstProps.worldWidth, ConstProps.worldHeight), new MtList<Bullet>(), new MtList<Alien>());
+        this(numberOfBullets, 0, new Random(), new CollisionProcessing(), new WorldScene(ConstProps.worldWidth, ConstProps.worldHeight), new MtList<Bullet>(), new MtList<Alien>());
     }
-
-    Bullet bullet1 = new Bullet(null, null, 1);
-    Bullet bullet2 = new Bullet(null, null, 1);
-    Bullet bullet3 = new Bullet(null, null, 1);
     
+    // TODO remove the world scene from the world struct, not needed makescene handles it
     WorldScene worldScene = new WorldScene(ConstProps.worldWidth, ConstProps.worldHeight);
-    IList<Bullet> bullets = new ConsList<Bullet>(bullet1, new ConsList<Bullet>(bullet2, new ConsList<Bullet>(bullet3, new MtList<Bullet>())));
+    IList<Bullet> bullets;
     IList<Alien> aliens;
 
     CollisionProcessing collisionProcessing;
@@ -699,20 +714,40 @@ class NBulletsWorld extends World {
     public IList<Alien> spawnNewAliensHelper(Random rng, int aliensLeft) {
         if (aliensLeft > 0) {
             if (rng.nextInt(2) == 0) {
-                return new ConsList<Alien>(new Alien(null, null), spawnNewAliensHelper(rng, aliensLeft - 1));
+                return new ConsList<Alien>(
+                        new Alien(new CartesianVector(ConstProps.shipVelocityRight, 0), new CartesianVector(
+                                ConstProps.LEFT_EDGE,
+                                rng.nextInt((int) (ConstProps.shipSpawnLocationYMax - ConstProps.shipSpawnLocationYMin))
+                                        + ConstProps.shipSpawnLocationYMin)),
+                        spawnNewAliensHelper(rng, aliensLeft - 1));
+            } else {
+                return new ConsList<Alien>(
+                        new Alien(new CartesianVector(ConstProps.shipVelocityLeft, 0), new CartesianVector(
+                                ConstProps.RIGHT_EDGE,
+                                rng.nextInt((int) (ConstProps.shipSpawnLocationYMax - ConstProps.shipSpawnLocationYMin))
+                                        + ConstProps.shipSpawnLocationYMin)),
+                        spawnNewAliensHelper(rng, aliensLeft - 1));
             }
-            else {
-                return new ConsList<Alien>(new Alien(null, null), spawnNewAliensHelper(rng, aliensLeft - 1));
-            }
-        }
-        else {
+        } else {
             if (rng.nextInt(2) == 0) {
-                return new ConsList<Alien>(new Alien(null, null), new MtList<Alien>());
-            }
-            else {
-                return new ConsList<Alien>(new Alien(null, null), new MtList<Alien>());
+                return new ConsList<Alien>(new Alien(new CartesianVector(ConstProps.shipVelocityRight, 0),
+                        new CartesianVector(ConstProps.LEFT_EDGE,
+                                rng.nextInt((int) (ConstProps.shipSpawnLocationYMax - ConstProps.shipSpawnLocationYMin))
+                                        + ConstProps.shipSpawnLocationYMin)),
+                        new MtList<Alien>());
+            } else {
+                return new ConsList<Alien>(new Alien(new CartesianVector(ConstProps.shipVelocityLeft, 0),
+                        new CartesianVector(ConstProps.RIGHT_EDGE,
+                                rng.nextInt((int) (ConstProps.shipSpawnLocationYMax - ConstProps.shipSpawnLocationYMin))
+                                        + ConstProps.shipSpawnLocationYMin)),
+                        new MtList<Alien>());
             }
         }
+    }
+    
+    public Bullet createNewShot() {
+        // TODO just fix the bullet angles in general
+        return new Bullet(ConstProps.vectorToPlayerPos, new PolarVector(ConstProps.bulletSpeed, Math.PI/2), ConstProps.vectorToPlayerPos, 1);
     }
 
     public IList<Alien> spawnNewAliens(Random rng) {
@@ -721,29 +756,33 @@ class NBulletsWorld extends World {
 
     @Override
     public WorldScene makeScene() {
-        bullet1.coords = new PolarVector(100, Math.PI/4);
-        bullet2.setCoords(new PolarVector(75, Math.PI/4));
-        bullet3.coords = new PolarVector(50, Math.PI/4);
         // TODO fix this to align with the draw order Jason said in instructions
         return aliens.foldl(bullets.foldl(worldScene, new DrawBulletsCombin()), new DrawAlienCombin())
-                .placeImageXY(ConstProps.playerImage, (int) ConstProps.initialPlayerStartingPoint.xComponent,
+                     .placeImageXY(ConstProps.playerImage, (int) ConstProps.initialPlayerStartingPoint.xComponent,
                         (int) ConstProps.initialPlayerStartingPoint.yComponent);
     }
     @Override
     public World onTick() {
-        // TODO check if I need to update the world scene here
-        // TODO add in the random aliens on the sides
-        // TODO remove bullets and aliens that are off the screen
+        // TODO if theres time spawn the aliens off the screen then have them start moving inwards
+        // would need to change the predicates checking if they're off screen then
+        // would make them spawning in look more smooth
         if (shipSpawnTimer == ConstProps.shipSpawnRate) {
-            return new NBulletsWorld(playerBulletsLeft, shipSpawnTimer + 1, rng, worldScene,
-                bullets .foldl(new MtList<Bullet>(), new BulletMultiplyCombin(bullets.filter(new DuplicateListPred<Bullet>(collisionProcessing.checkAliensCollidedWith(bullets, aliens)))))
-                        .map(new OnTickUpdateBulletCoordsFunc())
+            
+            return new NBulletsWorld(playerBulletsLeft, 0, rng, collisionProcessing, worldScene,
+                    bullets.filter(new BulletOnScreenPred())
+                            .foldl(new MtList<Bullet>(),
+                            new BulletMultiplyCombin(bullets.filter(new DuplicateListPred<Bullet>(
+                                    collisionProcessing.checkAliensCollidedWith(bullets, aliens)))))
+                            .map(new OnTickUpdateBulletCoordsFunc())
                 ,
-                aliens  .filter(new DuplicateListPred<Alien>(collisionProcessing.checkBulletsCollidedWith(aliens, bullets)))
-                            .map(new OnTickUpdateAliensCoordsFunc()));
+                    aliens  .filter(new AlienOnScreenPred())
+                            .filter(new DuplicateListPred<Alien>(collisionProcessing.checkBulletsCollidedWith(aliens, bullets)))
+                            .map(new OnTickUpdateAliensCoordsFunc())
+                            .append(spawnNewAliens(rng))
+            );
         }
         else {
-            return new NBulletsWorld(playerBulletsLeft, shipSpawnTimer + 1, rng, worldScene,
+            return new NBulletsWorld(playerBulletsLeft, shipSpawnTimer + 1, rng, collisionProcessing, worldScene,
                 bullets .foldl(new MtList<Bullet>(), new BulletMultiplyCombin(bullets.filter(new DuplicateListPred<Bullet>(collisionProcessing.checkAliensCollidedWith(bullets, aliens)))))
                         .map(new OnTickUpdateBulletCoordsFunc())
                 ,
@@ -754,7 +793,13 @@ class NBulletsWorld extends World {
     @Override
     public World onKeyEvent(String s) {
         // TODO Add in shots when spacebar pressed
-        return super.onKeyEvent(s);
+        if (s.equals("space")) {
+            return new NBulletsWorld(playerBulletsLeft, shipSpawnTimer, rng, collisionProcessing, worldScene,
+                    bullets.append(createNewShot()),
+                    aliens);
+        }
+        return new NBulletsWorld(playerBulletsLeft, shipSpawnTimer, rng, collisionProcessing, worldScene, bullets,
+                aliens);
     }
 }
 
@@ -766,6 +811,6 @@ public class nbullets {
 
     public static void main(String[] args) {
         NBulletsWorld gameWorld = new NBulletsWorld(10);
-        gameWorld.bigBang(ConstProps.worldWidth, ConstProps.worldHeight, 1);
+        gameWorld.bigBang(ConstProps.worldWidth, ConstProps.worldHeight, ConstProps.tickRate);
     }
 }
