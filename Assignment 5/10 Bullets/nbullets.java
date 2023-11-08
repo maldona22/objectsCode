@@ -293,7 +293,7 @@ class DuplicateListPred<T> implements IPred<T> {
     IList<T> x;
 
     public boolean apply(T y) {
-        return !x.contains(y);
+        return !(x.contains(y));
     }
 
     DuplicateListPred(IList<T> x) {
@@ -322,10 +322,10 @@ class ConstProps {
     static final double bulletSpeed = 8.0;
     static final int worldWidth = 800;
     static final int worldHeight = 450;
-    static final int RIGHT_EDGE = 800;
+    static final int RIGHT_EDGE = worldWidth;
     static final int LEFT_EDGE = 0;
     static final int TOP_EDGE = 0;
-    static final int BOTTOM_EDGE = 450;
+    static final int BOTTOM_EDGE = worldHeight;
 
     static final int initialBulletRadius = 2;
     static final int bulletRadiusGrowth = 2;
@@ -342,13 +342,21 @@ class ConstProps {
     static final Color fontColor = new Color(255, 255, 255);
     static final int fontSize = 13;
     static final int playerRadius = 25;
-    static final CartesianVector initialPlayerStartingPoint = new CartesianVector(worldWidth / 2.0, worldHeight);
+
+    //static final CartesianVector initialPlayerStartingPoint = new CartesianVector(worldWidth / 2.0, worldHeight);
+    static final double playerStartHypotenuse = Math
+            .sqrt(Math.pow(worldHeight, 2) + Math.pow(worldWidth / 2.0, 2));
+    // this should need to be subtracted from 90 but it doesn't??
+    // need to figure out what the fuck coordinate system this thing works with
+    // TODO fix this shit
+    static final double playerStartAngle = ((Math.PI / 2) - Math.asin((worldWidth / 2.0) / playerStartHypotenuse)) * -1.0;
+    static final PolarVector playerStart = new PolarVector(playerStartHypotenuse,
+            playerStartAngle);
+
     static final double tickRate = 1.0 / 28.0;
     static final int shipSpawnRate = (int) (1 / tickRate);
     static final int minimumShipsSpawned = 1;
     static final int maximumShipsSpawned = 3;
-
-    static final PolarVector vectorToPlayerPos = new PolarVector(300, Math.PI / 4);
 
     // TODO change the default alien image
     static final WorldImage alienImage = new CircleImage(ConstProps.shipRadius, OutlineMode.SOLID,
@@ -356,6 +364,16 @@ class ConstProps {
     // TODO change the default player image
     static final WorldImage playerImage = new CircleImage(ConstProps.playerRadius, OutlineMode.SOLID,
             new Color(0, 255, 0));
+
+    static final boolean greaterThanEq(double a, double b, double epsilon) {
+        return (a + epsilon >= b) || (a - epsilon >= b);
+    }
+
+    static final boolean lessThanEq(double a, double b, double epsilon) {
+        return (a + epsilon <= b) || (a - epsilon <= b);
+    }
+
+    static final double defaultEpsilon = 0.001;
     /* 
     static final PolarVector translateToJavaLibCoords(PolarVector vector) {
         // TODO figure out what the translation amount for r and theta is
@@ -376,15 +394,25 @@ class PolarVector implements Vector {
         //this.startPoint = startPoint;
     }
     
-    CartesianVector convertToCartesian() {
+    
+    private CartesianVector convertToCartesian() {
         return new CartesianVector(rComponent * Math.cos(thetaComponent), rComponent * Math.sin(thetaComponent));
     }
     
+    
     double distanceBetweenPoints(CartesianVector a) {
         //distance formula
-        CartesianVector converted = this.convertToCartesian();
+        CartesianVector converted = this.translateToCartesianVector();
         return Math.sqrt(
                 Math.pow(a.xComponent - converted.xComponent, 2) + Math.pow(a.yComponent - converted.yComponent, 2));
+    }
+
+    PolarVector translateVector() {
+        return new PolarVector(this.rComponent, this.thetaComponent * -1);
+    }
+
+    CartesianVector translateToCartesianVector() {
+        return this.translateVector().convertToCartesian();
     }
 }
     
@@ -403,6 +431,16 @@ abstract class NPC {
 
 }
 
+class StartPosVector {
+    boolean isPlayer;
+    PolarVector vector;
+
+    StartPosVector(boolean isPlayer, PolarVector vector) {
+        this.isPlayer = isPlayer;
+        this.vector = vector;
+    }
+}
+
 // TODO just fix the bullets in general
 class Bullet extends NPC {
     // Doesn't cap? Appears to at times but always seems to get larger, most I've gotten was 25
@@ -417,65 +455,80 @@ class Bullet extends NPC {
     PolarVector startPositionVector;
     PolarVector currentPositionVector;
 
-    Bullet(PolarVector coords, PolarVector velocityVector, PolarVector startPositionPolarVector, int multiplier) {
+    Bullet(PolarVector coords, PolarVector velocityVector, PolarVector startPositionPolarVector, int radius, int multiplier) {
         this.velocityVector = velocityVector;
         this.coords = coords;
         this.multiplier = multiplier;
         this.startPositionVector = startPositionPolarVector;
+        this.radius = radius;
     }
 
     PolarVector getCurrentPosPolar() {
-        return addPolarVectors(startPositionVector,
-                new PolarVector(coords.rComponent, coords.thetaComponent));
+        return this.addPolarVectors(startPositionVector);
     }
 
     Bullet onTickUpdateCoords() {
+        // Since the bullets never change angles here we only have to account for the added distance traveled
+        // However the infrastructure is here to change angles if we wanted to in the code
         PolarVector newCoords = new PolarVector(coords.rComponent + velocityVector.rComponent,
                 coords.thetaComponent);
-        return new Bullet(addPolarVectors(addPolarVectors(ConstProps.vectorToPlayerPos, startPositionVector), newCoords), velocityVector, startPositionVector ,multiplier);
+        return new Bullet(newCoords, velocityVector, startPositionVector, radius, multiplier);
     }
     
-    PolarVector addPolarVectors(PolarVector a, PolarVector b) {
-        return new PolarVector(Math.sqrt(Math.pow(a.rComponent, 2) + Math.pow(b.rComponent, 2) + (2 * a.rComponent * b.rComponent * Math.cos(b.thetaComponent - a.thetaComponent))),
-            a.thetaComponent + Math.atan2(b.rComponent * Math.sin(b.thetaComponent - a.thetaComponent), a.rComponent + (b.rComponent * Math.cos(b.thetaComponent - a.thetaComponent))));
+    static PolarVector addPolarVectors(PolarVector a, PolarVector b) {
+        return new PolarVector(
+                Math.sqrt(Math.pow(a.rComponent, 2) + Math.pow(b.rComponent, 2)
+                        + (2 * a.rComponent * b.rComponent * Math.cos(b.thetaComponent - a.thetaComponent))),
+                a.thetaComponent + Math.atan2(b.rComponent * Math.sin(b.thetaComponent - a.thetaComponent),
+                        a.rComponent + (b.rComponent * Math.cos(b.thetaComponent - a.thetaComponent))));
+    }
+    
+    /* 
+    PolarVector addPolarVectors(StartPosVector a) {
+        if (a.isPlayer) {
+            return this.coords;
+        }
+        else {
+            return addPolarVectors(this.coords, a.vector);
+        }
+    }
+*/
+
+    PolarVector addPolarVectors(PolarVector a) {
+        return addPolarVectors(this.coords, a);
     }
 
     IList<Bullet> multiplyHelper(int multipler, double angleOffset, int loop) {
-        if (loop != 0) {
+        if (loop > 0) {
             return new ConsList<Bullet>(
-                    new Bullet(getCurrentPosPolar(),
+                    new Bullet(new PolarVector(0, angleOffset * loop),
                     new PolarVector(ConstProps.bulletSpeed, angleOffset * loop),
-                           startPositionVector, 
+                            getCurrentPosPolar(),
+                            updateBulletRadius(multipler + 1),
                             multipler + 1),
-                    multiplyHelper(multipler, angleOffset, loop - 1));
+                    multiplyHelper(multipler, angleOffset, loop - 1)
+                    );
         } else {
             return new MtList<Bullet>();
         }
     }
-
-    void setCoords(PolarVector vector) {
-        this.coords = vector;
-    }
     
     IList<Bullet> multiply() {
-        double angleOffset = 360.0 / this.multiplier;
+        double angleOffset = (2 * Math.PI) / this.multiplier;
         return multiplyHelper(multiplier, angleOffset, multiplier);
     }
 
     boolean collidedWithAlien(Alien alien) {
-        // TODO need to change code so that the radius is held within the bullet itself
-        // Rather than calculated when drawing the bullet images
-        return this.coords.distanceBetweenPoints(alien.coords) < this.radius;
+        return ConstProps.lessThanEq(this.getCurrentPosPolar().distanceBetweenPoints(alien.coords), this.radius + ConstProps.shipRadius, ConstProps.defaultEpsilon);
     }
 
-    // I probably don't actually need this method but just to keep the code for where I'll actually use it
-    void updateBulletRadius() {
-        int bulletRadius = ConstProps.initialBulletRadius * this.multiplier;
+    int updateBulletRadius(int multiplier) {
+        int bulletRadius = ConstProps.initialBulletRadius * multiplier;
         if (bulletRadius > ConstProps.maxBulletRadius) {
-            this.radius = ConstProps.maxBulletRadius;
+            return ConstProps.maxBulletRadius;
         }
         else {
-            this.radius = bulletRadius;
+            return bulletRadius;
         }
     }
     // TODO change the default bullet image
@@ -517,7 +570,10 @@ class Player {
 
 class DrawBulletsCombin implements Combinator<Bullet, WorldScene> {
     public WorldScene apply(Bullet bullet, WorldScene scene) {
-        CartesianVector convertedCoords = bullet.coords.convertToCartesian();
+        PolarVector currentPos = bullet.getCurrentPosPolar();
+        CartesianVector convertedCoords = currentPos.translateToCartesianVector();
+        //System.out.println("currentPos   r: " + currentPos.rComponent + " theta: " + currentPos.thetaComponent);
+        //System.out.println("converted    x: " + convertedCoords.xComponent + " y: " + convertedCoords.yComponent);
         return scene.placeImageXY(bullet.createBulletImage(), (int) convertedCoords.xComponent,
                 (int) convertedCoords.yComponent);
     }
@@ -656,13 +712,14 @@ class AppendCombin implements Combinator<IList<Pair<Bullet, Alien>>, IList<Pair<
 
 class BulletOnScreenPred implements IPred<Bullet> {
     public boolean apply(Bullet bullet) {
-        CartesianVector currentPos = bullet.getCurrentPosPolar().convertToCartesian();
+        CartesianVector currentPos = bullet.getCurrentPosPolar().translateToCartesianVector();
+        System.out.println("x: " + currentPos.xComponent + " y: " + currentPos.yComponent);
         // TODO account for the radius of the bullet here
-        Boolean OnScreenX = (currentPos.xComponent <= ConstProps.RIGHT_EDGE)
-                || (currentPos.xComponent >= ConstProps.LEFT_EDGE);
-        Boolean OnScreeny = (currentPos.yComponent <= ConstProps.BOTTOM_EDGE)
-                || (currentPos.yComponent >= ConstProps.TOP_EDGE);
-        return (OnScreenX || OnScreeny);
+        boolean OnScreenX = ConstProps.lessThanEq(currentPos.xComponent, ConstProps.RIGHT_EDGE, ConstProps.defaultEpsilon)
+                && ConstProps.greaterThanEq(currentPos.xComponent, ConstProps.LEFT_EDGE, ConstProps.defaultEpsilon);
+        boolean OnScreeny = ConstProps.lessThanEq(currentPos.yComponent, ConstProps.BOTTOM_EDGE, ConstProps.defaultEpsilon)
+                && ConstProps.greaterThanEq(currentPos.yComponent, ConstProps.TOP_EDGE, ConstProps.defaultEpsilon);
+        return (OnScreenX && OnScreeny);
     }
 }
 
@@ -670,9 +727,10 @@ class AlienOnScreenPred implements IPred<Alien> {
     public boolean apply(Alien alien) {
         CartesianVector currentPos = alien.coords;
         // TODO account for the radius of the alien here
-        Boolean OnScreenX = (currentPos.xComponent <= ConstProps.RIGHT_EDGE) || (currentPos.xComponent >= ConstProps.LEFT_EDGE);
-        Boolean OnScreeny = (currentPos.yComponent <= ConstProps.BOTTOM_EDGE) || (currentPos.yComponent >= ConstProps.TOP_EDGE);
-        return (OnScreenX || OnScreeny);
+        // TODO change this inequality for the epsilon versions
+        Boolean OnScreenX = (currentPos.xComponent <= ConstProps.RIGHT_EDGE) && (currentPos.xComponent >= ConstProps.LEFT_EDGE);
+        Boolean OnScreeny = (currentPos.yComponent <= ConstProps.BOTTOM_EDGE) && (currentPos.yComponent >= ConstProps.TOP_EDGE);
+        return (OnScreenX && OnScreeny);
     }
 }
 
@@ -711,6 +769,17 @@ class NBulletsWorld extends World {
 
     CollisionProcessing collisionProcessing;
 
+    public void printBullets(IList<Bullet> list) {
+        if (list instanceof ConsList<Bullet>) {
+            System.out.println("r: " + ((ConsList<Bullet>) list).first.coords.rComponent + " theta: "
+                    + ((ConsList<Bullet>) list).first.coords.thetaComponent);
+            printBullets(((ConsList<Bullet>)list).rest);
+        }
+        else {
+            return;
+        }
+    }
+
     public IList<Alien> spawnNewAliensHelper(Random rng, int aliensLeft) {
         if (aliensLeft > 0) {
             if (rng.nextInt(2) == 0) {
@@ -747,7 +816,14 @@ class NBulletsWorld extends World {
     
     public Bullet createNewShot() {
         // TODO just fix the bullet angles in general
-        return new Bullet(ConstProps.vectorToPlayerPos, new PolarVector(ConstProps.bulletSpeed, Math.PI/2), ConstProps.vectorToPlayerPos, 1);
+        if (bullets instanceof ConsList<Bullet>) {
+            System.out.println("there are bullets");
+            printBullets(bullets);
+        }
+        else {
+            System.out.println("nope");
+        }
+        return new Bullet(new PolarVector(0, Math.PI/2.0), new PolarVector(ConstProps.bulletSpeed, Math.PI/2), ConstProps.playerStart, ConstProps.initialBulletRadius, 1);
     }
 
     public IList<Alien> spawnNewAliens(Random rng) {
@@ -757,9 +833,12 @@ class NBulletsWorld extends World {
     @Override
     public WorldScene makeScene() {
         // TODO fix this to align with the draw order Jason said in instructions
+        CartesianVector convertedCoords = ConstProps.playerStart.translateToCartesianVector();
+        //System.out.println("x: " + convertedCoords.xComponent + " y: " + convertedCoords.yComponent);
+        //CartesianVector convertedCoords = (new PolarVector(ConstProps.translatedPlayerStartHypotenuse, 0)).convertToCartesian();
         return aliens.foldl(bullets.foldl(worldScene, new DrawBulletsCombin()), new DrawAlienCombin())
-                     .placeImageXY(ConstProps.playerImage, (int) ConstProps.initialPlayerStartingPoint.xComponent,
-                        (int) ConstProps.initialPlayerStartingPoint.yComponent);
+                     .placeImageXY(ConstProps.playerImage, (int) convertedCoords.xComponent,
+                        (int) convertedCoords.yComponent);
     }
     @Override
     public World onTick() {
@@ -767,34 +846,70 @@ class NBulletsWorld extends World {
         // would need to change the predicates checking if they're off screen then
         // would make them spawning in look more smooth
         if (shipSpawnTimer == ConstProps.shipSpawnRate) {
-            
+            IList<Bullet> step1 = bullets.filter(new BulletOnScreenPred());
+            IList<Bullet> step2 = step1.foldl(new MtList<Bullet>(),
+                                    new BulletMultiplyCombin(collisionProcessing.checkAliensCollidedWith(bullets, aliens)));
+            IList<Bullet> step3 = step2.map(new OnTickUpdateBulletCoordsFunc());
             return new NBulletsWorld(playerBulletsLeft, 0, rng, collisionProcessing, worldScene,
+                // replace this again once done testing
+                step3,
+                /* 
                     bullets.filter(new BulletOnScreenPred())
                             .foldl(new MtList<Bullet>(),
+                                    new BulletMultiplyCombin(bullets.filter(new DuplicateListPred<Bullet>(
+                                            collisionProcessing.checkAliensCollidedWith(bullets, aliens)))))
+                            .map(new OnTickUpdateBulletCoordsFunc()),
+                */
+                    aliens.filter(new AlienOnScreenPred())
+                            .filter(new DuplicateListPred<Alien>(
+                                    collisionProcessing.checkBulletsCollidedWith(aliens, bullets)))
+                            .map(new OnTickUpdateAliensCoordsFunc())
+                            .append(spawnNewAliens(rng)));
+        } else {
+            IList<Bullet> step1 = bullets.filter(new BulletOnScreenPred());
+            IList<Bullet> step2 = step1.foldl(new MtList<Bullet>(),
+                    new BulletMultiplyCombin(collisionProcessing.checkAliensCollidedWith(bullets, aliens)));
+            IList<Bullet> step3 = step2.map(new OnTickUpdateBulletCoordsFunc());
+            /* 
+            IList<Bullet> step2 = step1.foldl(new MtList<Bullet>(),
+                            new BulletMultiplyCombin(bullets.filter(new DuplicateListPred<Bullet>(
+                            collisionProcessing.checkAliensCollidedWith(bullets, aliens)))));
+                            */
+            
+            return new NBulletsWorld(playerBulletsLeft, shipSpawnTimer + 1, rng, collisionProcessing, worldScene,
+                step3,
+                /* 
+                    bullets.foldl(new MtList<Bullet>(),
                             new BulletMultiplyCombin(bullets.filter(new DuplicateListPred<Bullet>(
                                     collisionProcessing.checkAliensCollidedWith(bullets, aliens)))))
-                            .map(new OnTickUpdateBulletCoordsFunc())
-                ,
-                    aliens  .filter(new AlienOnScreenPred())
-                            .filter(new DuplicateListPred<Alien>(collisionProcessing.checkBulletsCollidedWith(aliens, bullets)))
-                            .map(new OnTickUpdateAliensCoordsFunc())
-                            .append(spawnNewAliens(rng))
-            );
-        }
-        else {
-            return new NBulletsWorld(playerBulletsLeft, shipSpawnTimer + 1, rng, collisionProcessing, worldScene,
-                bullets .foldl(new MtList<Bullet>(), new BulletMultiplyCombin(bullets.filter(new DuplicateListPred<Bullet>(collisionProcessing.checkAliensCollidedWith(bullets, aliens)))))
-                        .map(new OnTickUpdateBulletCoordsFunc())
-                ,
-                aliens  .filter(new DuplicateListPred<Alien>(collisionProcessing.checkBulletsCollidedWith(aliens, bullets)))
+                            .map(new OnTickUpdateBulletCoordsFunc()),
+                    */
+                    aliens.filter(
+                            new DuplicateListPred<Alien>(collisionProcessing.checkBulletsCollidedWith(aliens, bullets)))
                             .map(new OnTickUpdateAliensCoordsFunc()));
-                    }
+        }
     }
+
+    // TODO need to write a game ending scene
+    /* 
+    public WorldScene makeLastScene() {
+        
+    }
+    
+    @Override
+    public WorldEnd worldEnds() {
+        if (playerBulletsLeft == 0 && bullets.equals(new MtList<Bullet>())) {
+            return new WorldEnd(true, this.makeLastScene());
+        } else {
+            return new WorldEnd(false, this.makeScene());
+        }
+    }
+    */
     @Override
     public World onKeyEvent(String s) {
         // TODO Add in shots when spacebar pressed
-        if (s.equals("space")) {
-            return new NBulletsWorld(playerBulletsLeft, shipSpawnTimer, rng, collisionProcessing, worldScene,
+        if (s.equals(" ")) {
+            return new NBulletsWorld(playerBulletsLeft - 1, shipSpawnTimer, rng, collisionProcessing, worldScene,
                     bullets.append(createNewShot()),
                     aliens);
         }
