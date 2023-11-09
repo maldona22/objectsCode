@@ -37,15 +37,8 @@ interface IList<T> {
     // Adds an object of type T to the end of this
     IList<T> append(T element);
 
-    // Sorts elements within this based upon the given predicate lambdas
-    IList<T> quickSortList(PredicateLambda<T, IPred<T>> smallPred,
-            PredicateLambda<T, IPred<T>> largePred);
-
     // Maps a predicate check to all the elements within this
     boolean andmap(IPred<T> pred);
-
-    // Computes if there are any duplicate elements in this based upon the given predicate lambda
-    boolean containsNoDuplicates(PredicateLambda<T, IPred<T>> duplicatePred);
 
     public <B, C> B foldlAux(Combinator<T, B> combinator, B accum);
 
@@ -117,19 +110,8 @@ class MtList<T> implements IList<T> {
         return new ConsList<T>(element, new MtList<T>());
     }
 
-    // Sorts elements within this based upon the given predicate lambdas
-    public IList<T> quickSortList(PredicateLambda<T, IPred<T>> smallPred,
-            PredicateLambda<T, IPred<T>> largePred) {
-        return new MtList<T>();
-    }
-
     // Maps a predicate check to all the elements within this
     public boolean andmap(IPred<T> pred) {
-        return true;
-    }
-
-    // Computes if there are any duplicate elements in this based upon the given predicate lambda
-    public boolean containsNoDuplicates(PredicateLambda<T, IPred<T>> duplicatePred) {
         return true;
     }
 
@@ -248,26 +230,6 @@ class ConsList<T> implements IList<T> {
     public boolean andmap(IPred<T> pred) {
         return pred.apply(this.first) && this.rest.andmap(pred);
     }
-
-    // Produces a predicate based upon the lambda given and an object of type N
-    static <N> IPred<N> makePred(PredicateLambda<N, IPred<N>> operator, N pivot) {
-        return operator.op(pivot);
-    }
-
-    // Sorts elements within this based upon the given predicate lambdas
-    public IList<T> quickSortList(PredicateLambda<T, IPred<T>> smallPred,
-            PredicateLambda<T, IPred<T>> largePred) {
-        IList<T> smallerList = this.filter(makePred(smallPred, this.first));
-        IList<T> biggerList = this.filter(makePred(largePred, this.first));
-        return smallerList.quickSortList(smallPred, largePred).append(this.first)
-                .append(biggerList.quickSortList(smallPred, largePred));
-    }
-
-    // Computes if there are any duplicate elements in this based upon the given predicate lambda
-    public boolean containsNoDuplicates(PredicateLambda<T, IPred<T>> duplicatePred) {
-        return this.rest.andmap(makePred(duplicatePred, this.first)) && this.rest.containsNoDuplicates(duplicatePred);
-    }
-
     public <B, C> B foldlAux(Combinator<T, B> combinator, B accum) {
         return this.rest.foldlAux(combinator, combinator.apply(first, accum));
     }
@@ -329,15 +291,6 @@ interface Combinator<T,B> {
     public B apply(T t, B b);
 }
 
-// Template for predicate lambdas
-interface PredicateLambda<T, R> {
-    public R op(T t);
-}
-
-interface Coordinate {
-
-}
-
 interface Vector {
 
 }
@@ -367,13 +320,11 @@ class ConstProps {
     static final int fontSize = 13;
     static final int playerRadius = 25;
 
-    //static final CartesianVector initialPlayerStartingPoint = new CartesianVector(worldWidth / 2.0, worldHeight);
-    static final double playerStartHypotenuse = Math
+    static private final double playerStartHypotenuse = Math
             .sqrt(Math.pow(worldHeight, 2) + Math.pow(worldWidth / 2.0, 2));
-    // this should need to be subtracted from 90 but it doesn't??
-    // need to figure out what the fuck coordinate system this thing works with
-    // TODO fix this shit
-    static final double playerStartAngle = ((Math.PI / 2) - Math.asin((worldWidth / 2.0) / playerStartHypotenuse)) * -1.0;
+
+    static private final double playerStartAngle = ((Math.PI / 2)
+            - Math.asin((worldWidth / 2.0) / playerStartHypotenuse)) * -1.0;
     static final PolarVector playerStart = new PolarVector(playerStartHypotenuse,
             playerStartAngle);
 
@@ -402,26 +353,8 @@ class ConstProps {
     }
 
     static final double defaultEpsilon = 0.001;
-
-    static void printBullets(IList<Bullet> list) {
-        if (list instanceof ConsList<Bullet>) {
-            System.out.println("r: " + ((ConsList<Bullet>) list).first.coords.rComponent + " theta: "
-                    + ((ConsList<Bullet>) list).first.coords.thetaComponent);
-            printBullets(((ConsList<Bullet>)list).rest);
-        }
-        else {
-            return;
-        }
-    }
-    /* 
-    static final PolarVector translateToJavaLibCoords(PolarVector vector) {
-        // TODO figure out what the translation amount for r and theta is
-    }
-    */
-    
-    //static final WorldImage bulletImage = new CircleImage(ConstProps.initialBulletRadius, OutlineMode.SOLID, new Color(255, 0, 0));
 }
-    // Only ever need to keep track of 3 vectors max for any given bullet
+
 class PolarVector implements Vector {
     double rComponent;
     double thetaComponent;
@@ -442,28 +375,21 @@ class PolarVector implements Vector {
         return new CartesianVector(rComponent * Math.cos(thetaComponent), rComponent * Math.sin(thetaComponent));
     }
     
-    
     double distanceBetweenPoints(CartesianVector a) {
-        //distance formula
         CartesianVector converted = this.translateToCartesianVector();
         Double distance = Math.sqrt(
                 Math.pow(a.xComponent - converted.xComponent, 2) + Math.pow(a.yComponent - converted.yComponent, 2));
-        //System.out.println(distance);
         return distance;
     }
 
-    PolarVector translateVector() {
-        return new PolarVector(this.rComponent, this.thetaComponent * -1);
-    }
-
     CartesianVector translateToCartesianVector() {
-        return this.translateVector().convertToCartesian();
+        return new PolarVector(this.rComponent, this.thetaComponent * -1).convertToCartesian();
     }
 }
     
 class CartesianVector implements Vector {
-    double xComponent;
-    double yComponent;
+    Double xComponent;
+    Double yComponent;
     //Coordinate startPoint;
     
     CartesianVector(double xComponent, double yComponent) {
@@ -471,23 +397,9 @@ class CartesianVector implements Vector {
         this.yComponent = yComponent;
     }
 }
-    
-abstract class NPC {
-
-}
-
-class StartPosVector {
-    boolean isPlayer;
-    PolarVector vector;
-
-    StartPosVector(boolean isPlayer, PolarVector vector) {
-        this.isPlayer = isPlayer;
-        this.vector = vector;
-    }
-}
 
 // TODO just fix the bullets in general
-class Bullet extends NPC {
+class Bullet {
     // Doesn't cap? Appears to at times but always seems to get larger, most I've gotten was 25
     // Determines the number of bullets that are released by killed alien
     // AKA how much to multiple this bullet by
@@ -535,17 +447,6 @@ class Bullet extends NPC {
                 a.thetaComponent + Math.atan2(b.rComponent * Math.sin(b.thetaComponent - a.thetaComponent),
                         a.rComponent + (b.rComponent * Math.cos(b.thetaComponent - a.thetaComponent))));
     }
-    
-    /* 
-    PolarVector addPolarVectors(StartPosVector a) {
-        if (a.isPlayer) {
-            return this.coords;
-        }
-        else {
-            return addPolarVectors(this.coords, a.vector);
-        }
-    }
-*/
 
     PolarVector addPolarVectors(PolarVector a) {
         return addPolarVectors(this.coords, a);
@@ -555,36 +456,21 @@ class Bullet extends NPC {
         if (loop > 0) {
             return new ConsList<Bullet>(
                     new Bullet(new PolarVector(0.1, angleOffset * loop),
-                    new PolarVector(ConstProps.bulletSpeed, angleOffset * loop),
+                            new PolarVector(ConstProps.bulletSpeed, angleOffset * loop),
                             getCurrentPosPolar(),
                             updateBulletRadius(multipler),
                             multipler),
-                    multiplyHelper(multipler, angleOffset, loop - 1)
-                    );
+                    multiplyHelper(multipler, angleOffset, loop - 1));
         } else {
             return new MtList<Bullet>();
         }
     }
     
     IList<Bullet> multiply() {
-        double angleOffset = (2 * Math.PI) / this.multiplier;
-        /*
-        if (multiplier > 6) {
-            throw new IllegalArgumentException();
-        }
-        */
-        IList<Bullet> newBullets =  multiplyHelper(this.multiplier + 1, angleOffset, this.multiplier + 1);
-        //ConstProps.printBullets(newBullets);
-        return newBullets;
+        return multiplyHelper(this.multiplier + 1, (2 * Math.PI) / this.multiplier, this.multiplier + 1);
     }
 
     boolean collidedWithAlien(Alien alien) {
-        if(ConstProps.lessThanEq(this.getCurrentPosPolar().distanceBetweenPoints(alien.coords), this.radius + ConstProps.shipRadius, ConstProps.defaultEpsilon)) {
-            System.out.println(this.getCurrentPosPolar().distanceBetweenPoints(alien.coords));
-        System.out.println("threshold: " + (this.radius + ConstProps.shipRadius));
-        System.out.println("radius: " + this.radius);
-        }
-        
         return ConstProps.lessThanEq(this.getCurrentPosPolar().distanceBetweenPoints(alien.coords), this.radius + ConstProps.shipRadius, ConstProps.defaultEpsilon);
     }
 
@@ -603,17 +489,7 @@ class Bullet extends NPC {
     }
 }
 
-class Pair<T, X> {
-    T t;
-    X x;
-
-    Pair(T t, X x) {
-        this.t = t;
-        this.x = x;
-    }
-}
-
-class Alien extends NPC {
+class Alien {
     CartesianVector velocityVector;
     CartesianVector coords;
 
@@ -626,16 +502,13 @@ class Alien extends NPC {
         return new Alien(velocityVector,
                 new CartesianVector(coords.xComponent + velocityVector.xComponent, coords.yComponent));
     }
-
-    //boolean collidedWithAlien()
 }
 
 class DrawBulletsCombin implements Combinator<Bullet, WorldScene> {
     public WorldScene apply(Bullet bullet, WorldScene scene) {
-        PolarVector currentPos = bullet.getCurrentPosPolar();
-        CartesianVector convertedCoords = currentPos.translateToCartesianVector();
-        return scene.placeImageXY(bullet.createBulletImage(), (int) convertedCoords.xComponent,
-                (int) convertedCoords.yComponent);
+        CartesianVector convertedCoords = bullet.getCurrentPosPolar().translateToCartesianVector();
+        return scene.placeImageXY(bullet.createBulletImage(), convertedCoords.xComponent.intValue(),
+                convertedCoords.yComponent.intValue());
     }
 }
 
@@ -655,7 +528,7 @@ class OnTickUpdateAliensCoordsFunc implements IFunc<Alien, Alien> {
 
 class DrawAlienCombin implements Combinator<Alien, WorldScene> {
     public WorldScene apply(Alien alien, WorldScene scene) {
-        return scene.placeImageXY(ConstProps.alienImage, (int) alien.coords.xComponent, (int) alien.coords.yComponent);
+        return scene.placeImageXY(ConstProps.alienImage, alien.coords.xComponent.intValue(), alien.coords.yComponent.intValue());
     }
 }
 
@@ -753,8 +626,6 @@ class BulletMultiplyCombin implements Combinator<Bullet, IList<Bullet>> {
 
     public IList<Bullet> apply(Bullet bullet, IList<Bullet> accum) {
         if (explodedBullets.contains(bullet)) {
-            // really ham fisted, but might solve our problems, who knows
-            // explodedBullets = explodedBullets.removeObject(bullet);
             return bullet.multiply().append(accum);
         } else {
             return new ConsList<Bullet>(bullet, accum);
@@ -769,7 +640,7 @@ class BulletMultiplyCombin implements Combinator<Bullet, IList<Bullet>> {
 class BulletOnScreenPred implements IPred<Bullet> {
     public boolean apply(Bullet bullet) {
         CartesianVector currentPos = bullet.getCurrentPosPolar().translateToCartesianVector();
-        // TODO account for the radius of the bullet here
+
         boolean OnScreenX = ConstProps.lessThanEq(currentPos.xComponent, ConstProps.RIGHT_EDGE, ConstProps.defaultEpsilon)
                 && ConstProps.greaterThanEq(currentPos.xComponent, ConstProps.LEFT_EDGE, ConstProps.defaultEpsilon);
         boolean OnScreeny = ConstProps.lessThanEq(currentPos.yComponent, ConstProps.BOTTOM_EDGE, ConstProps.defaultEpsilon)
@@ -781,15 +652,17 @@ class BulletOnScreenPred implements IPred<Bullet> {
 class AlienOnScreenPred implements IPred<Alien> {
     public boolean apply(Alien alien) {
         CartesianVector currentPos = alien.coords;
-        // TODO account for the radius of the alien here
-        // TODO change this inequality for the epsilon versions
-        Boolean OnScreenX = (currentPos.xComponent <= ConstProps.RIGHT_EDGE) && (currentPos.xComponent >= ConstProps.LEFT_EDGE);
-        Boolean OnScreeny = (currentPos.yComponent <= ConstProps.BOTTOM_EDGE) && (currentPos.yComponent >= ConstProps.TOP_EDGE);
+        boolean OnScreenX = ConstProps.lessThanEq(currentPos.xComponent, ConstProps.RIGHT_EDGE, ConstProps.defaultEpsilon) && ConstProps.greaterThanEq(currentPos.xComponent, ConstProps.LEFT_EDGE, ConstProps.defaultEpsilon);
+        boolean OnScreeny = ConstProps.lessThanEq(currentPos.yComponent, ConstProps.BOTTOM_EDGE, ConstProps.defaultEpsilon) && ConstProps.greaterThanEq(currentPos.yComponent, ConstProps.TOP_EDGE, ConstProps.defaultEpsilon);
         return (OnScreenX && OnScreeny);
     }
 }
 
 class NBulletsWorld extends World {
+    CollisionProcessing collisionProcessing;
+    WorldScene worldScene;
+    IList<Bullet> bullets;
+    IList<Alien> aliens;
     int playerBulletsLeft;
     int shipSpawnTimer;
     Random rng;
@@ -815,24 +688,6 @@ class NBulletsWorld extends World {
     
     NBulletsWorld(int numberOfBullets) {
         this(numberOfBullets, 0, new Random(), new CollisionProcessing(), new WorldScene(ConstProps.worldWidth, ConstProps.worldHeight), new MtList<Bullet>(), new MtList<Alien>());
-    }
-    
-    // TODO remove the world scene from the world struct, not needed makescene handles it
-    WorldScene worldScene = new WorldScene(ConstProps.worldWidth, ConstProps.worldHeight);
-    IList<Bullet> bullets;
-    IList<Alien> aliens;
-
-    CollisionProcessing collisionProcessing;
-
-    public void printBullets(IList<Bullet> list) {
-        if (list instanceof ConsList<Bullet>) {
-            System.out.println("r: " + ((ConsList<Bullet>) list).first.coords.rComponent + " theta: "
-                    + ((ConsList<Bullet>) list).first.coords.thetaComponent);
-            printBullets(((ConsList<Bullet>)list).rest);
-        }
-        else {
-            return;
-        }
     }
 
     public IList<Alien> spawnNewAliensHelper(Random rng, int aliensLeft) {
@@ -870,7 +725,6 @@ class NBulletsWorld extends World {
     }
     
     public Bullet createNewShot() {
-        // TODO just fix the bullet angles in general
         return new Bullet(new PolarVector(0, Math.PI/2.0), new PolarVector(ConstProps.bulletSpeed, Math.PI/2), ConstProps.playerStart, ConstProps.initialBulletRadius, 2);
     }
 
@@ -882,11 +736,10 @@ class NBulletsWorld extends World {
     public WorldScene makeScene() {
         // TODO fix this to align with the draw order Jason said in instructions
         CartesianVector convertedCoords = ConstProps.playerStart.translateToCartesianVector();
-        //System.out.println("x: " + convertedCoords.xComponent + " y: " + convertedCoords.yComponent);
-        //CartesianVector convertedCoords = (new PolarVector(ConstProps.translatedPlayerStartHypotenuse, 0)).convertToCartesian();
+        
         return aliens.foldl(bullets.foldl(worldScene, new DrawBulletsCombin()), new DrawAlienCombin())
-                .placeImageXY(ConstProps.playerImage, (int) convertedCoords.xComponent,
-                        (int) convertedCoords.yComponent);
+                .placeImageXY(ConstProps.playerImage, convertedCoords.xComponent.intValue(),
+                        convertedCoords.yComponent.intValue());
     }
     
     @Override
@@ -902,22 +755,11 @@ class NBulletsWorld extends World {
             
             IList<Bullet> step2 = step1.foldl(new MtList<Bullet>(),
                     new BulletMultiplyCombin(collisionProcessing.checkAliensCollidedWith(bullets, aliens)));
-            System.out.println("before explode: " + step1.length());
-            //ConstProps.printBullets(step1);
-            System.out.println("exploded: " + explodedBullets.length());
-            //ConstProps.printBullets(explodedBullets);
 
             IList<Bullet> step3 = addMultiplied.map(new OnTickUpdateBulletCoordsFunc());
             return new NBulletsWorld(playerBulletsLeft, 0, rng, collisionProcessing, worldScene,
                 // replace this again once done testing
                 step3,
-                /* 
-                    bullets.filter(new BulletOnScreenPred())
-                            .foldl(new MtList<Bullet>(),
-                                    new BulletMultiplyCombin(bullets.filter(new DuplicateListPred<Bullet>(
-                                            collisionProcessing.checkAliensCollidedWith(bullets, aliens)))))
-                            .map(new OnTickUpdateBulletCoordsFunc()),
-                */
                     aliens.filter(new AlienOnScreenPred())
                             .filter(new DuplicateListPred<Alien>(
                                     collisionProcessing.checkBulletsCollidedWith(aliens, bullets)))
@@ -928,11 +770,6 @@ class NBulletsWorld extends World {
             IList<Bullet> explodedBullets = collisionProcessing.checkAliensCollidedWith(bullets, aliens);
             IList<Bullet> bulletsRemoved = step1.filter(new DuplicateListPred<Bullet>(explodedBullets));
             IList<Bullet> addMultiplied = bulletsRemoved.append(collisionProcessing.getMultipliedBullets(explodedBullets));
-
-            System.out.println("before explode: " + step1.length());
-            //ConstProps.printBullets(step1);
-            System.out.println("exploded: " + explodedBullets.length());
-            //ConstProps.printBullets(explodedBullets);
             
             //IList<Bullet> step2 = step1.foldl(new MtList<Bullet>(), new BulletMultiplyCombin(collisionProcessing.checkAliensCollidedWith(bullets, aliens)));
             IList<Bullet> step3 = addMultiplied.map(new OnTickUpdateBulletCoordsFunc());
@@ -944,12 +781,6 @@ class NBulletsWorld extends World {
             
             return new NBulletsWorld(playerBulletsLeft, shipSpawnTimer + 1, rng, collisionProcessing, worldScene,
                 step3,
-                /* 
-                    bullets.foldl(new MtList<Bullet>(),
-                            new BulletMultiplyCombin(bullets.filter(new DuplicateListPred<Bullet>(
-                                    collisionProcessing.checkAliensCollidedWith(bullets, aliens)))))
-                            .map(new OnTickUpdateBulletCoordsFunc()),
-                    */
                     aliens.filter(
                             new DuplicateListPred<Alien>(collisionProcessing.checkBulletsCollidedWith(aliens, bullets)))
                             .map(new OnTickUpdateAliensCoordsFunc()));
@@ -957,6 +788,7 @@ class NBulletsWorld extends World {
     }
 
     // TODO need to write a game ending scene
+
     /* 
     public WorldScene makeLastScene() {
         
@@ -971,9 +803,9 @@ class NBulletsWorld extends World {
         }
     }
     */
+
     @Override
     public World onKeyEvent(String s) {
-        // TODO Add in shots when spacebar pressed
         if (s.equals(" ")) {
             return new NBulletsWorld(playerBulletsLeft - 1, shipSpawnTimer, rng, collisionProcessing, worldScene,
                     bullets.append(createNewShot()),
