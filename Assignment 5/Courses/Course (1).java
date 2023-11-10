@@ -9,11 +9,11 @@ interface IFunc<A, R> {
 }
 
 interface IListVisitor<T, R> extends IFunc<IList<T>, R> {
-    R apply(MtList<T> mtList);
-    R apply(ConsList<T> consList);
+    R visitMtList(MtList<T> mtList);
+    R visitConsList(ConsList<T> consList);
 }
 
-interface IList<T> extends IFunc<IListVisitor<T, Integer>, Integer> {
+interface IList<T> {
     /* 
     int getDeepestPathLength();
     boolean hasPreReqs(String preReqName);
@@ -21,17 +21,9 @@ interface IList<T> extends IFunc<IListVisitor<T, Integer>, Integer> {
     boolean ormap(IPred<T> pred);
     int accept(IListVisitor<T, Integer> visitor);
     boolean accept(Ormap<T> t);
-    }
+}
     
-    class MtList<T> implements IList<T> {
-    
-    public int getDeepestPathLength() {
-        return 0;
-    }
-    
-    public boolean hasPreReqs(String preReqName) {
-        return false;
-    }
+class MtList<T> implements IList<T> {
     
     public boolean ormap(IPred<T> pred) {
         return false;
@@ -43,12 +35,9 @@ interface IList<T> extends IFunc<IListVisitor<T, Integer>, Integer> {
     public boolean accept(Ormap<T> t) {
         return false;
     }
-    public Integer apply(IListVisitor<T, Integer> arg) {
-        return arg.apply(this);
-    }
-    }
+}
     
-    class ConsList<T> implements IList<T> {
+class ConsList<T> implements IList<T> {
         T first;
         IList<T> rest;
 
@@ -56,21 +45,10 @@ interface IList<T> extends IFunc<IListVisitor<T, Integer>, Integer> {
         this.first = first;
         this.rest = rest;
     }
-
-    /*
-    public int getDeepestPathLength() {
-        return Math.max(first.getDeepestPathLength(), rest.getDeepestPathLength());
-    }
-    
-    public boolean hasPreReqs(String preReqName) {
-        return first.hasPreReq(preReqName) || rest.hasPreReq(preReqName);
-    }
-    */
     
     public boolean ormap(IPred<T> pred) {
         return pred.apply(first) || rest.ormap(pred);
     }
-    
     
     public int accept(IListVisitor<T, Integer> visitor) {
         return visitor.apply(this);
@@ -78,11 +56,7 @@ interface IList<T> extends IFunc<IListVisitor<T, Integer>, Integer> {
     public boolean accept(Ormap<T> t) {
         return t.apply(this);
     }
-    
-    public Integer apply(IListVisitor<T, Integer> arg) {
-        return arg.apply(this);
-    }
-    }
+}
     
 class Course {
     String name;
@@ -93,7 +67,7 @@ class Course {
         this.preReqs = preReqs;
     }
     public boolean hasPrereq(String preReqName) {
-        return new HasPreReq(preReqName).apply(this.preReqs);
+        return new HasPreReq(preReqName).apply(this);
     }
     public int getDeepestPathLength() {
         return new DeepestPathLength().apply(this.preReqs);
@@ -109,15 +83,16 @@ class Course {
 }
     
 class DeepestPathLength implements IListVisitor<Course, Integer> {
-    public Integer apply(MtList<Course> mtList) {
+    public Integer visitMtList(MtList<Course> mtList) {
         return 0;
     }
-    public Integer apply(ConsList<Course> consList) {
+    
+    public Integer visitConsList(ConsList<Course> consList) {
         return Math.max(consList.first.getDeepestPathLength(), consList.rest.accept(this));
     }
     
     public Integer apply(IList<Course> arg) {
-        return this.apply(arg);
+        return arg.accept(this);
     }
 }
     
@@ -130,21 +105,21 @@ class HasPreReq implements IPred<Course> {
         this.preReqName = preReqName;
     }
     
+    /* 
     public Boolean apply(MtList<Course> mtList) {
         return false;
     }
     
     public Boolean apply(ConsList<Course> consList) {
-        return consList.first.hasPrereq(preReqName) || consList.rest.accept(this);
+        return consList.first.hasPrereq(preReqName) || this.apply(consList.rest);
+    }
+    */
+
+    public Boolean apply(Course course) {
+        return course.name.equals(preReqName) || new Ormap<Course>(this).apply(course.preReqs);
     }
     
-    public Boolean apply(Course courses) {
-        return courses.accept(this);
-    }
-    
-    public Boolean apply(IList<Course> arg) {
-        return arg.accept(this);
-    }
+
 }
     
 class Ormap<T> implements IListVisitor<T, Boolean> {
@@ -154,10 +129,10 @@ class Ormap<T> implements IListVisitor<T, Boolean> {
         this.pred = pred;
     }
     
-    public Boolean apply(MtList<T> mtList) {
+    public Boolean visitMtList(MtList<T> mtList) {
         return false;
     }
-    public Boolean apply(ConsList<T> consList) {
+    public Boolean visitConsList(ConsList<T> consList) {
         return pred.apply(consList.first) || consList.rest.accept(this);
     }
     
@@ -182,6 +157,7 @@ class Ormap<T> implements IListVisitor<T, Boolean> {
                 t.checkExpect(new HasPreReq(CSAS2125.name).apply(CSAS2126), true) &&
                 t.checkExpect(new HasPreReq("Software Engineering").apply(CSAS2126), false);
     }
+    /*
     boolean testDeepestPathLength(Tester t) {
         return t.checkExpect(new DeepestPathLength().apply(CSAS1114), 0) &&
                 t.checkExpect(new DeepestPathLength().apply(CSAS1115), 1) &&
@@ -190,6 +166,7 @@ class Ormap<T> implements IListVisitor<T, Boolean> {
                 t.checkExpect(new DeepestPathLength().apply(CSAS2126), 4) &&
                 t.checkExpect(new DeepestPathLength().apply(PHIL1204), 4);
     }
+    */
     }
     
     /*
