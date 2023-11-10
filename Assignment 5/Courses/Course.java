@@ -192,6 +192,7 @@ class ExamplesCourse {
                 t.checkExpect(new HasPreReq(CSAS2125.name).apply(CSAS2126), true) &&
                 t.checkExpect(new HasPreReq("Software Engineering").apply(CSAS2126), false);
     }
+
     boolean testDeepestPathLength(Tester t) {
         return t.checkExpect(new DeepestPathLength().apply(CSAS1114), 0) &&
                 t.checkExpect(new DeepestPathLength().apply(CSAS1115), 1) &&
