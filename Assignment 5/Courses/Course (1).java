@@ -110,20 +110,13 @@ class Course {
 }
     
 class DeepestPathLength implements IFunc<Course, Integer>{
-    public Integer visitMtList(MtList<Course> mtList) {
-        return 0;
-    }
-    
-    public Integer visitConsList(ConsList<Course> consList) {
-        return Math.max(consList.first.getDeepestPathLength(), consList.rest.accept(this));
-    }
-    
     public Integer apply(Course course) {
         if (course.preReqs.isEmpty()) {
             return 1;
         }
         else {
-            return 1 + MaxVisitor.apply(course.preReqs.map(this.apply));
+            MaxVisitor visitor = new MaxVisitor()
+            return 1 + visitor.apply(course.preReqs.map(this));
         }
     }
 }
@@ -169,6 +162,7 @@ class Ormap<T> implements IListVisitor<T, Boolean> {
 }
 
 class MaxVisitor implements IListVisitor<Integer, Integer> {
+
     public Integer visitMtList(MtList<Integer> mtList) {
         return Integer.MIN_VALUE;
     }
