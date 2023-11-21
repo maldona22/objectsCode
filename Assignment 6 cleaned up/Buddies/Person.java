@@ -200,7 +200,7 @@ class DirectedWeightedGraph {
     }
 
     public ILoEdge getAllEdges(Person src) {
-        return getAllEdges(src);
+        return graph.getAllEdges(src);
     }
 
     void copyStackMt(Stack copy, MtLoEdge original) {

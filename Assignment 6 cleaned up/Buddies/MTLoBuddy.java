@@ -116,7 +116,7 @@ class MtLoAdjacencyList implements ILoAdjacencyList {
     }
 
     public ILoEdge getAllEdges(Person src) {
-        throw new IllegalArgumentException();
+        return new MtLoEdge();
     }
 }
 
