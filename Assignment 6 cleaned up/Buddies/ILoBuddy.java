@@ -67,5 +67,7 @@ interface ILoDouble {
 }
 
 interface ILoStack {
-    ILoDouble map(ConvertListToWeights func);
+    ILoDouble map(ConvertListToLikelihoods func);
+
+    int length();
 }

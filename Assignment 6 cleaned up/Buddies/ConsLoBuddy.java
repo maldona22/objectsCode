@@ -194,7 +194,11 @@ class ConsLoStack implements ILoStack {
         this.rest = rest;
     }
 
-    public ILoDouble map(ConvertListToWeights func) {
+    public ILoDouble map(ConvertListToLikelihoods func) {
         return new ConsLoDouble(func.apply(this.first), this.rest.map(func));
+    }
+
+    public int length() {
+        return 1 + this.rest.length();
     }
 }

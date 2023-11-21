@@ -48,6 +48,7 @@ class ExtendedBuddyCombinator {
 
     public ILoBuddy apply(Person person, ILoBuddy accum) {
         if (person.buddies.filter(new DuplicatePeoplePred(visited)).isEmpty()) {
+            visited = visited.append(person);
             return accum.append(person);
         } else {
             visited = visited.append(person);
@@ -64,7 +65,8 @@ class ExtendedBuddyCombinator {
 
 class PartyCountCombinator {
     public ILoBuddy apply(Person person, ILoBuddy accum) {
-        return accum.append(person).append(person.buddies.foldr(new MTLoBuddy(), new ExtendedBuddyCombinator()));
+        return accum.append(person)
+                    .append(person.buddies.foldr(new MTLoBuddy(), new ExtendedBuddyCombinator()));
     }
 }
 
@@ -84,7 +86,8 @@ class MultiplyWeightsCombinator {
 
 // -------------------------------- IFuncs --------------------------------
 
-class ConvertListToWeights {
+// TODO change test names to ConvertListToLikelihoods
+class ConvertListToLikelihoods {
     double apply(Stack stack) {
         return stack.stack.foldr(1, new MultiplyWeightsCombinator());
     }
@@ -159,10 +162,6 @@ class Stack {
     public Edge popMt(MtLoEdge stack) {
         throw new IllegalAccessError();
     }
-
-    public Edge peek() {
-        return ((ConsLoEdge) stack).first;
-    }
 }
 
 class DirectedWeightedGraph {
@@ -221,12 +220,13 @@ class DirectedWeightedGraph {
         return;
     }
 
-    // I hate brute forcing this like this
-    // But if I'm right this problem boils down to a longest path problem
-    // Since the largest weight (diction * hearing) available is the maximum likelihood path
-    // Which means I have no choice but to brute force it like this
-    // I have to be wrong about this right? We didnt actually get an NP-Hard problem... right?
-    // -Andres
+    // Upon further inspection, I seem to have thought about this too broadly
+    // If you treat it like a normal graph where the edges are calculated
+    // independent from one another this is the way to go, however, because of the way the edge 
+    // weights are calculated *here* it works out that the shortest path(s) will always be the ones 
+    // with the maximum likelihood. If people had different levels of diction and/or hearing 
+    // with different people then this would not be the case, however, they always have the same 
+    // levels regardless of who they are talking to. 
     void findAllPathsCons(Person node, ConsLoEdge connectedNodes, Person targetNode) {
         if (connectedNodes.first.dstEquals(targetNode)) {
             Stack temp = new Stack();
@@ -243,6 +243,9 @@ class DirectedWeightedGraph {
             connectionPath.push(connectedNodes.first);
             findAllPathsHelper(connectedNodes.first.dst, graph.getAllEdges(connectedNodes.first.dst), targetNode);
             connectionPath.pop();
+            findAllPathsHelper(node, connectedNodes.rest, targetNode);
+        }
+        else {
             findAllPathsHelper(node, connectedNodes.rest, targetNode);
         }
     }
@@ -293,30 +296,30 @@ class Person {
         return this.buddies.contains(that);
     }
 
+    ILoBuddy allPartyInvites() {
+        return buddies  .foldr(new MTLoBuddy(), new PartyCountCombinator())
+                        .append(this)
+                        .removeDuplicates();
+    }
+
     // returns the number of people who will show up at the party 
     // given by this person
     int partyCount() {
         // combine all buddy lists together, remove duplicates after
-
-        // TODO need to add the host, make sure not to double count
-        return buddies  .foldr(new MTLoBuddy(), new PartyCountCombinator())
-                        .append(this)
-                        .removeDuplicates()
-                        .length();
+        return allPartyInvites().length();
     }
 
     // returns the number of people that are direct buddies 
     // of both this and that person
     int countCommonBuddies(Person that) {
-        return buddies  .filter(new ExtractDuplicatePeoplePred(that.buddies))
-                        .length();
+        return this.buddies .filter(new ExtractDuplicatePeoplePred(that.buddies))
+                            .length();
     }
 
     // will the given person be invited to a party 
     // organized by this person?
     boolean hasExtendedBuddy(Person that) {
-        return this.buddies .foldr(new MTLoBuddy(), new PartyCountCombinator())
-                            .contains(that);
+        return allPartyInvites().contains(that);
     }
 
     static void printBuddies(ILoBuddy list) {
@@ -340,15 +343,12 @@ class Person {
     }
     
     double maxLikelihood(Person that) {
+        // TODO Make sure this returns zero if they're not connected
         DirectedWeightedGraph graph = new DirectedWeightedGraph();
-        graph = buddies .foldr(new MTLoBuddy(), new PartyCountCombinator())
-                        .append(this)
-                        .removeDuplicates()
-                        .foldr(graph, new ConvertToGraphCombinator());
-        ILoStack paths = graph.findAllPaths(this, that);
-        printEdges(((ConsLoStack) paths).first.stack);
-        ILoDouble likelihoods = paths.map(new ConvertListToWeights());
-        return likelihoods.max();
+        return allPartyInvites().foldr(graph, new ConvertToGraphCombinator())
+                                .findAllPaths(this, that)
+                                .map(new ConvertListToLikelihoods())
+                                .max();
     }
     
     public static void main(String[] args) {
@@ -363,6 +363,7 @@ class Person {
         Person jan = new Person("Jan", 0.64, 0.99);
         Person kim = new Person("Kim", 0.56, 0.77);
         Person len = new Person("Len", 0.53, 0.58);
+        Person jake = new Person("Jake", 0.92, 0.74);
 
         anne.addBuddy(bob);
         anne.addBuddy(cole);
@@ -372,6 +373,9 @@ class Person {
         bob.addBuddy(hank);
 
         cole.addBuddy(dan);
+        cole.addBuddy(jake);
+
+        jake.addBuddy(gabi);
 
         dan.addBuddy(cole);
 
@@ -382,6 +386,7 @@ class Person {
 
         gabi.addBuddy(ed);
         gabi.addBuddy(fay);
+        gabi.addBuddy(jake);
 
         jan.addBuddy(kim);
         jan.addBuddy(len);
@@ -392,9 +397,11 @@ class Person {
         len.addBuddy(kim);
         len.addBuddy(jan);
 
-        ConsLoBuddy people = new ConsLoBuddy(anne, new ConsLoBuddy(bob, new ConsLoBuddy(cole, new ConsLoBuddy(dan, 
-                new ConsLoBuddy(ed, new ConsLoBuddy(fay,
-                        new ConsLoBuddy(gabi, new ConsLoBuddy(kim, new ConsLoBuddy(len, new ConsLoBuddy(jan, new ConsLoBuddy(hank, new MTLoBuddy())))))))))));
+        ConsLoBuddy people = new ConsLoBuddy(jake,
+                new ConsLoBuddy(anne, new ConsLoBuddy(bob, new ConsLoBuddy(cole, new ConsLoBuddy(dan,
+                        new ConsLoBuddy(ed, new ConsLoBuddy(fay,
+                                new ConsLoBuddy(gabi, new ConsLoBuddy(kim, new ConsLoBuddy(len,
+                                        new ConsLoBuddy(jan, new ConsLoBuddy(hank, new MTLoBuddy()))))))))))));
 
         System.out.println("Common friends kim and len: " + kim.countCommonBuddies(len));
         System.out.println("Common friends kim and hank: " + kim.countCommonBuddies(hank));
@@ -404,6 +411,7 @@ class Person {
         System.out.println("------------------\nResult: ");
         System.out.println(anne.hasExtendedBuddy(hank));
         System.out.println(anne.partyCount());
+        printBuddies(anne.buddies.foldr(new MTLoBuddy(), new ExtendedBuddyCombinator()));
         //DFS searcher = new DFS(new ConsLoBuddy(anne, anne.buddies));
         //System.out.println(searcher.depthFirstSearch(hank).username);
         System.out.println("------------------\nPath: ");
@@ -412,9 +420,12 @@ class Person {
         DirectedWeightedGraph why = new DirectedWeightedGraph();
         why = people.foldr(why, new ConvertToGraphCombinator());
         ILoStack paths = why.findAllPaths(anne, gabi);
+        System.out.println(paths.length());
         //printEdges(((ConsLoStack) ((ConsLoStack) paths).rest).first.stack);
         System.out.println("------------------\nPath2: ");
-        //printEdges( ((ConsLoStack) paths).first.stack);
+        printEdges(((ConsLoStack) paths).first.stack);
+        System.out.println("------------------\nPath3: ");
+        printEdges( (((ConsLoStack) ((ConsLoStack) paths).rest).first).stack);
         System.out.println(anne.maxLikelihood(gabi));
     }
 }

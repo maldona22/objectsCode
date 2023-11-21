@@ -100,7 +100,7 @@ class MtLoAdjacencyList implements ILoAdjacencyList {
     }
 
     public ILoAdjacencyList addEdges(Person src, ILoBuddy dsts) {
-        return new MtLoAdjacencyList();
+        return dsts.addEdges(this, src);
     }
 
     public ILoAdjacencyList addEdgesCons(Person src, ConsLoBuddy dsts) {
@@ -131,7 +131,11 @@ class MtLoDouble implements ILoDouble {
 }
 
 class MtLoStack implements ILoStack {
-    public ILoDouble map(ConvertListToWeights func) {
+    public ILoDouble map(ConvertListToLikelihoods func) {
         return new MtLoDouble();
+    }
+
+    public int length() {
+        return 0;
     }
 }

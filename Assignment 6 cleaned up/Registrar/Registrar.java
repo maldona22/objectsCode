@@ -1,3 +1,4 @@
+import tester.*;
 // Template for making predicates for use in higher order functions
 interface IPred<T> {
     boolean apply(T t);
@@ -215,7 +216,7 @@ class ConsList<T> implements IList<T> {
 
     // Adds an object of type T to the end of this
     public IList<T> append(T element) {
-        return new ConsList<T>(first, new ConsList<T>(element, new MtList<T>()));
+        return this.append(new ConsList<T>(element, new MtList<T>()));
     }
 
     // Maps a predicate check to all the elements within this
@@ -239,7 +240,7 @@ class ConsList<T> implements IList<T> {
     }
 
     public IList<T> removeDuplicates() {
-        return new ConsList<T>(first, rest.filter(new DuplicatePred<T>(first)).removeDuplicates());
+        return new ConsList<T>(first, rest.filter(new ExtractObjectPred<T>(first)).removeDuplicates());
     }
 
     public IList<T> removeObject(T t) {
@@ -255,26 +256,26 @@ class ConsList<T> implements IList<T> {
     }
 }
 
-class DuplicatePred<T> implements IPred<T>{
+class ExtractObjectPred<T> implements IPred<T>{
     T x;
 
     public boolean apply(T y) {
-        return !x.equals(y);
+        return x.equals(y);
     }
 
-    DuplicatePred(T x) {
+    ExtractObjectPred(T x) {
         this.x = x;
     }
 }
 
-class DuplicateListPred<T> implements IPred<T> {
+class ExtractListPred<T> implements IPred<T> {
     IList<T> x;
 
     public boolean apply(T y) {
-        return !(x.contains(y));
+        return (x.contains(y));
     }
 
-    DuplicateListPred(IList<T> x) {
+    ExtractListPred(IList<T> x) {
         this.x = x;
     }
 }
@@ -284,10 +285,11 @@ interface Combinator<T, B> {
 }
 
 class InClassCombin implements Combinator<Course, IList<Student>> {
+    
     Student classmate;
 
     public IList<Student> apply(Course course, IList<Student> accum) {
-        return course.students.filter(new DuplicatePred<Student>(classmate)).append(accum);
+        return course.students.filter(new ExtractObjectPred<Student>(classmate)).append(accum);
     }
     
     InClassCombin(Student classmate) {
@@ -296,6 +298,7 @@ class InClassCombin implements Combinator<Course, IList<Student>> {
 }
 
 class Student {
+
     String name;
     int id;
     IList<Course> courses;
@@ -307,7 +310,10 @@ class Student {
     }
 
     void enroll(Course c) {
-        this.courses = courses.append(c);
+        this.courses = this.courses.append(c);
+        //System.out.println("debug: " + c.name);
+        //Registrar.printClasses(this.courses);
+        //System.out.println("--------------------------");
         c.students = c.students.append(this);
     }
 
@@ -318,15 +324,17 @@ class Student {
 }
 
 class Instructor {
+
     String name;
     IList<Course> courses;
 
     Instructor(String name) {
         this.name = name;
+        this.courses = new MtList<Course>();
     }
 
     boolean dejavu(Student c) {
-        
+        // This just needs a new combinator in general
         return this.courses.foldl(new MtList<Student>(), new InClassCombin(c)).length() > 1;
     }
 }
@@ -339,9 +347,175 @@ class Course {
     Course(String name, Instructor prof) {
         this.name = name;
         this.prof = prof;
+        this.students = new MtList<Student>();
+        this.prof.courses = this.prof.courses.append(this);
     }
 }
 
 public class Registrar {
 
+    static void printClasses(IList<Course> list) {
+        if (list instanceof ConsList<Course>) {
+            System.out.println(((ConsList<Course>) list).first.name);
+            printClasses(((ConsList<Course>) list).rest);
+        }
+    }
+
+    static void printStudents(IList<Student> list) {
+        if (list instanceof ConsList<Student>) {
+            System.out.println(((ConsList<Student>) list).first.name);
+            printStudents(((ConsList<Student>) list).rest);
+        }
+    }
+
+    public static void main(String[] args) {
+        Instructor jasonHemann = new Instructor("Jason Hemann");
+        Instructor marcoMorazon = new Instructor("Marco Morazon");
+        Instructor shajinaAnand = new Instructor("Shajina Anand");
+        Instructor vicenteMedina = new Instructor("Vincene Medina");
+        Instructor eugeneReyonolds = new Instructor("Eugene Reynolds");
+        Course CSAS1114 = new Course("Intro to Programming I", marcoMorazon);
+        Course CSAS1115 = new Course("Intro to Programming II", marcoMorazon);
+        Course CSAS2123 = new Course("Into to Objects I", jasonHemann);
+        Course CSAS2125 = new Course("Assembly Language", shajinaAnand);
+        Course MATH2711 = new Course("Statisics", eugeneReyonolds);
+        Course PHIL1204 = new Course("Symbolic Logic", vicenteMedina);
+        Student student1 = new Student("Sue", 127489);
+        Student student2 = new Student("Tim", 187501);
+        Student student3 = new Student("John", 213480);
+        Student student4 = new Student("Amy", 226789);
+        Student student5 = new Student("Craig", 324057);
+
+        student1.enroll(CSAS1114);
+        student1.enroll(CSAS1115);
+        student1.enroll(CSAS2123);
+        student1.enroll(CSAS2125);
+        student1.enroll(MATH2711);
+
+        //student2.enroll(CSAS1115);
+        //student3.enroll(MATH2711);
+
+        printClasses(student1.courses);
+        System.out.println(student1.courses
+                .equals(new ConsList<Course>(CSAS1114, new ConsList<Course>(CSAS1115, new ConsList<Course>(CSAS2123, new ConsList<Course>(CSAS2125, new ConsList<Course>(MATH2711,  new MtList<Course>())))))));
+        System.out.println(marcoMorazon.dejavu(student1));
+        printStudents(CSAS1114.students.filter(new ExtractObjectPred<Student>(student1)));
+    }
 }
+
+class ExampleData {
+    Instructor jasonHemann = new Instructor("Jason Hemann");
+    Instructor marcoMorazon = new Instructor("Marco Morazon");
+    Instructor shajinaAnand = new Instructor("Shajina Anand");
+    Instructor vicenteMedina = new Instructor("Vincene Medina");
+    Instructor eugeneReyonolds = new Instructor("Eugene Reynolds");
+    Course CSAS1114 = new Course("Intro to Programming I", marcoMorazon);
+    Course CSAS1115 = new Course("Intro to Programming II", marcoMorazon);
+    Course CSAS2123 = new Course("Into to Objects I", jasonHemann);
+    Course CSAS2125 = new Course("Assembly Language", shajinaAnand);
+    Course MATH2711 = new Course("Statisics", eugeneReyonolds);
+    Course PHIL1204 = new Course("Symbolic Logic", vicenteMedina);
+    Student student1 = new Student("Sue", 127489);
+    Student student2 = new Student("Tim", 187501);
+    Student student3 = new Student("John", 213480);
+    Student student4 = new Student("Amy", 226789);
+    Student student5 = new Student("Craig", 324057);
+}
+
+/* 
+class Example{
+    Instructor jasonHemann = new Instructor("Jason Hemann");
+    Instructor marcoMorazon = new Instructor("Marco Morazon");
+    Instructor vicenteMedina = new Instructor("Vincene Medina");
+    Instructor eugeneReyonolds = new Instructor("Eugene Reynolds");
+    Course CSAS1114= new Course("Intro to Programming I", marcoMorazon);
+    Course CSAS1115 = new Course("Intro to Programming II", marcoMorazon);
+    Course CSAS2123 = new Course("Into to Objects I", jasonHemann);
+    Course CSAS2126 = new Course("Data Structures", jasonHemann);
+    Course MATH2711 = new Course("Statisics", eugeneReyonolds);
+    Course PHIL1204 = new Course("Symbolic Logic", vicenteMedina);
+
+    Student student1 = new Student("Sue", 127489);
+    Student student2 = new Student("Tim", 187501);
+    Student student3 = new Student("John", 213480);
+    Student student4 = new Student("Amy", 226789);
+    Student student5 = new Student("Craig", 324057);
+}
+class ExamplesRegistar {
+    boolean testEnrollOneClass(Tester t) {
+        Example exp = new Example();
+        exp.student1.enroll(exp.CSAS1114);
+        exp.student2.enroll(exp.CSAS1115);
+        exp.student3.enroll(exp.MATH2711);
+        return t.checkExpect(exp.student1.courses, new ConsList<Course>(exp.CSAS1114, new MtList<Course>())) &&
+                t.checkExpect(exp.student2.courses, new ConsList<Course>(exp.CSAS1115, new MtList<Course>())) &&
+                t.checkExpect(exp.student3.courses, new ConsList<Course>(exp.MATH2711, new MtList<Course>()));
+    }
+
+    boolean testEnrollTwoClasses(Tester t) {
+        Example exp = new Example();
+        exp.student1.enroll(exp.CSAS1114);
+        exp.student1.enroll(exp.MATH2711);
+
+        exp.student2.enroll(exp.CSAS1115);
+        exp.student2.enroll(exp.PHIL1204);
+
+        exp.student3.enroll(exp.MATH2711);
+        exp.student3.enroll(exp.CSAS1114);
+        return t.checkExpect(exp.student1.courses, new ConsList<Course> (exp.CSAS1114, new ConsList<Course>(exp.MATH2711, new MtList<Course>()))) &&
+                t.checkExpect(exp.student2.courses, new ConsList<Course> (exp.CSAS1115,  new ConsList<Course>(exp.PHIL1204, new MtList<Course>()))) &&
+                t.checkExpect(exp.student3.courses, new ConsList<Course> (exp.MATH2711, new ConsList<Course>(exp.CSAS1114, new MtList<Course>())));
+    }
+    boolean testEnrollMoreThanTwoClasses(Tester t) {
+        Example exp = new Example();
+        exp.student4.enroll(exp.CSAS1114);
+        exp.student4.enroll(exp.CSAS1115);
+        exp.student4.enroll(exp.CSAS2123);
+        exp.student4.enroll(exp.CSAS2126);
+        exp.student4.enroll(exp.MATH2711);
+        exp.student4.enroll(exp.PHIL1204);
+
+        exp.student5.enroll(exp.CSAS2123);
+        exp.student5.enroll(exp.CSAS2126);
+
+        return t.checkExpect(exp.student4.courses,
+                    new ConsList<Course>(exp.CSAS1114,
+                        new ConsList<Course>(exp.CSAS1115,
+                                new ConsList<Course>(exp.CSAS2123,
+                                        new ConsList<Course>(exp.CSAS2126,
+                                                new ConsList<Course>(exp.MATH2711,
+                                                        new ConsList<Course>(exp.PHIL1204,
+                                                                new MtList<Course>()))))))) &&
+                t.checkExpect(exp.student5.courses,
+                    new ConsList<Course>(exp.CSAS2126,
+                            new ConsList<Course>(exp.CSAS2123,
+                                    new MtList<Course>())));
+
+        }
+
+        boolean testClassmates(Tester t) {
+            Example exp = new Example();
+            return  t.checkExpect(exp.student4.classmates(exp.student5), false) &&
+                    t.checkExpect(exp.student3.classmates(exp.student1), true) &&
+                    t.checkExpect(exp.student1.classmates(exp.student2), false) &&
+                    t.checkExpect(exp.student1.classmates(exp.student3), true);
+        }
+
+
+    boolean testDejaVu(Tester t) {
+        Example exp = new Example();
+        exp.student4.enroll(exp.CSAS1114);
+        exp.student4.enroll(exp.CSAS1115);
+        exp.student4.enroll(exp.CSAS2123);
+        exp.student4.enroll(exp.CSAS2126);
+        exp.student4.enroll(exp.MATH2711);
+        exp.student4.enroll(exp.PHIL1204);
+
+        return t.checkExpect(exp.marcoMorazon.dejavu(exp.student4), true) &&
+                t.checkExpect(exp.jasonHemann.dejavu(exp.student5), true) &&
+                t.checkExpect(exp.vicenteMedina.dejavu(exp.student2), false) &&
+                t.checkExpect(exp.eugeneReyonolds.dejavu(exp.student3), false) &&
+                t.checkExpect(exp.jasonHemann.dejavu(exp.student1), false);
+    }
+}
+*/
