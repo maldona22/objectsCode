@@ -411,7 +411,7 @@ public class ExamplesBuddies {
     
     public void testMtLoEdgePop(Tester t) {
         ExampleData data = new ExampleData();
-        (new MtLoEdge()).pop(data.pathKimToJan);
+        //(new MtLoEdge()).pop(data.pathKimToJan);
         t.checkException(new IllegalAccessException(), (new MtLoEdge()), "pop", data.pathKimToJan);
     }
     
@@ -470,7 +470,8 @@ public class ExamplesBuddies {
     
     public void testMtLoAdjacencyListGetEdge(Tester t) {
         ExampleData data = new ExampleData();
-        t.checkException(new IllegalArgumentException(), (new MtLoAdjacencyList()), "getEdge", data.kim, data.dan);
+        MtLoAdjacencyList mtList = new MtLoAdjacencyList();
+        t.checkException(new IllegalArgumentException(), mtList, "getEdge", data.kim, data.dan);
     }
     
     public void testMtLoAdjacencyListGetAllEdges(Tester t) {
@@ -589,7 +590,7 @@ public class ExamplesBuddies {
     
     public void testDWGGetEdge(Tester t) {
         ExampleData data = new ExampleData();
-        t.checkExpect(data.graph.getEdge(data.kim, data.jan), data.kimToJan);
+        t.checkExpect(data.graph.getEdge(data.anne, data.bob), new Edge(data.bob, data.anne.diction*data.bob.hearing));
     }
     
     public void testDWGGetAllEdges(Tester t) {
