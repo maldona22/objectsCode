@@ -1,5 +1,37 @@
 // represents a list of Person's buddies
 class ConsLoBuddy implements ILoBuddy {
+    /* Template
+     * 
+     * Fields:
+     * this.first -- Person
+     * this.rest -- ILoBuddy
+     * 
+     * Methods:
+     * this.append(Person buddy) -- ILoBuddy
+     * this.append(ILoBuddy list) -- ILoBuddy
+     * this.contains(Person person) -- boolean
+     * this.filter(PersonPred pred) -- ILoBuddy
+     * this.removeDuplicates() -- ILoBuddy
+     * this.foldr(MTLoBuddy base, ExtendedBuddyCombinator combin) -- ILoBuddy
+     * this.foldr(MTLoBuddy base, PartyCountCombinator combin) -- ILoBuddy
+     * this.foldr(DirectedWeightedGraph base, ConvertToGraphCombinator combin) -- DirectedWeightedGraph
+     * this.length() -- int
+     * this.isEmpty() -- boolean
+     * this.addEdges(ILoAdjacencyList graph, Person src) -- ILoAdjacencyList
+     * 
+     * Methods on fields:
+     * this.rest.append(Person buddy) -- ILoBuddy
+     * this.rest.append(ILoBuddy list) -- ILoBuddy
+     * this.rest.contains(Person person) -- boolean
+     * this.rest.filter(PersonPred pred) -- ILoBuddy
+     * this.rest.removeDuplicates() -- ILoBuddy
+     * this.rest.foldr(MTLoBuddy base, ExtendedBuddyCombinator combin) -- ILoBuddy
+     * this.rest.foldr(MTLoBuddy base, PartyCountCombinator combin) -- ILoBuddy
+     * this.rest.foldr(DirectedWeightedGraph base, ConvertToGraphCombinator combin) -- DirectedWeightedGraph
+     * this.rest.length() -- int
+     * this.rest.isEmpty() -- boolean
+     * this.rest.addEdges(ILoAdjacencyList graph, Person src) -- ILoAdjacencyList
+     */
 
     Person first;
     ILoBuddy rest;
@@ -59,6 +91,34 @@ class ConsLoBuddy implements ILoBuddy {
 }
 
 class ConsLoEdge implements ILoEdge {
+    /* Template
+     * 
+     * Fields:
+     * this.first -- Edge
+     * this.rest -- ILoEdge
+     * 
+     * Methods:
+     * this.get(Person dst) -- Edge
+     * this.copyStack(DirectedWeightedGraph graph, Stack copy) -- void
+     * this.findAllPaths(DirectedWeightedGraph graph, Person node, Person target) -- void
+     * this.pop(Stack stack) -- Edge
+     * this.isEmpty() -- boolean
+     * this.contains(Edge edge) -- boolean
+     * this.append(ILoEdge edges) -- ILoEdge
+     * this.foldr(double base, MultiplyWeightsCombinator combin) -- double
+     * 
+     * Methods on fields:
+     * 
+     * this.rest.get(Person dst) -- Edge
+     * this.rest.copyStack(DirectedWeightedGraph graph, Stack copy) -- void
+     * this.rest.findAllPaths(DirectedWeightedGraph graph, Person node, Person target) -- void
+     * this.rest.pop(Stack stack) -- Edge
+     * this.rest.isEmpty() -- boolean
+     * this.rest.contains(Edge edge) -- boolean
+     * this.rest.append(ILoEdge edges) -- ILoEdge
+     * this.rest.foldr(double base, MultiplyWeightsCombinator combin) -- double
+     */
+
     Edge first;
     ILoEdge rest;
 
@@ -105,6 +165,33 @@ class ConsLoEdge implements ILoEdge {
 }
 
 class ConsLoAdjacencyList implements ILoAdjacencyList {
+    /* Template
+     * 
+     * Fields:
+     * this.first -- AdjacencyList
+     * this.rest -- ILoAdjacencyList
+     * 
+     * Methods:
+     * this.contains(Person src) -- boolean
+     * this.addNode(Person src) -- ConsLoAdjacencyList
+     * this.addEdge(Person src, Person dst) -- ILoAdjacencyList
+     * this.addEdges(Person src, ILoBuddy dsts) -- ILoAdjacencyList
+     * this.addEdgesCons(Person src, ConsLoBuddy dsts) -- ILoAdjacencyList
+     * this.addEdgesMt(Person src, MTLoBuddy dsts) -- ILoAdjacencyList
+     * this.getEdge(Person src, Person dst) -- Edge
+     * this.getAllEdges(Person src) -- ILoEdge
+     * 
+     * Methods on fields:
+     * this.rest.contains(Person src) -- boolean
+     * this.rest.addNode(Person src) -- ConsLoAdjacencyList
+     * this.rest.addEdge(Person src, Person dst) -- ILoAdjacencyList
+     * this.rest.addEdges(Person src, ILoBuddy dsts) -- ILoAdjacencyList
+     * this.rest.addEdgesCons(Person src, ConsLoBuddy dsts) -- ILoAdjacencyList
+     * this.rest.addEdgesMt(Person src, MTLoBuddy dsts) -- ILoAdjacencyList
+     * this.rest.getEdge(Person src, Person dst) -- Edge
+     * this.rest.getAllEdges(Person src) -- ILoEdge
+     */
+
     AdjacencyList first;
     ILoAdjacencyList rest;
 
@@ -162,7 +249,22 @@ class ConsLoAdjacencyList implements ILoAdjacencyList {
     }
 }
 
-class ConsLoDouble implements ILoDouble{
+class ConsLoDouble implements ILoDouble {
+    /* Template
+     * 
+     * Fields:
+     * this.first -- double
+     * this.rest -- ILoDouble
+     * 
+     * Methods:
+     * this.maxHelper(double max) -- double
+     * this.max() -- double
+     * 
+     * Methods on fields:
+     * this.rest.maxHelper(double max) -- double
+     * this.rest.max() -- double
+     */
+
     double first;
     ILoDouble rest;
 
@@ -186,6 +288,21 @@ class ConsLoDouble implements ILoDouble{
 }
 
 class ConsLoStack implements ILoStack {
+    /* Template
+     * 
+     * Fields:
+     * this.first -- Stack
+     * this.rest -- ILoStack
+     * 
+     * Methods:
+     * this.map(ConvertListToLikelihoods func) -- ILoDouble
+     * this.length() -- int
+     * 
+     * Methods on fields:
+     * this.rest.map(ConvertListToLikelihoods func) -- ILoDouble
+     * this.rest.length() -- int
+     */
+
     Stack first;
     ILoStack rest;
 

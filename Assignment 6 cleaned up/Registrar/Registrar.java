@@ -319,7 +319,7 @@ class Student {
 
     boolean classmates(Student c) {
         // TODO
-        return this.courses.foldl(new MtList<Student>(), new InClassCombin(c)).length() == 0;
+        return !(this.courses.foldl(new MtList<Student>(), new InClassCombin(c)).length() == 0);
     }
 }
 
@@ -391,6 +391,13 @@ public class Registrar {
         student1.enroll(CSAS2123);
         student1.enroll(CSAS2125);
         student1.enroll(MATH2711);
+        
+        student3.enroll(CSAS1114);
+        System.out.println(student3.classmates(student1));
+
+        student2.enroll(CSAS1114);
+        student2.enroll(CSAS1115);
+        System.out.println(student1.classmates(student2));
 
         //student2.enroll(CSAS1115);
         //student3.enroll(MATH2711);

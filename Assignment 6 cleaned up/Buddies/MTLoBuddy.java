@@ -1,6 +1,26 @@
 
 // represents an empty list of Person's buddies
-class MTLoBuddy implements ILoBuddy {
+public class MTLoBuddy implements ILoBuddy {
+    /* Template
+     * 
+     * Fields:
+     * 
+     * Methods:
+     * this.append(Person buddy) -- ILoBuddy
+     * this.append(ILoBuddy list) -- ILoBuddy
+     * this.contains(Person person) -- boolean
+     * this.filter(PersonPred pred) -- ILoBuddy
+     * this.removeDuplicates() -- ILoBuddy
+     * this.foldr(MTLoBuddy base, ExtendedBuddyCombinator combin) -- ILoBuddy
+     * this.foldr(MTLoBuddy base, PartyCountCombinator combin) -- ILoBuddy
+     * this.foldr(DirectedWeightedGraph base, ConvertToGraphCombinator combin) -- DirectedWeightedGraph
+     * this.length() -- int
+     * this.isEmpty() -- boolean
+     * this.addEdges(ILoAdjacencyList graph, Person src) -- ILoAdjacencyList
+     * 
+     * Methods on fields:
+     * 
+     */
 
     public boolean contains(Person person) {
         return false;
@@ -48,6 +68,24 @@ class MTLoBuddy implements ILoBuddy {
 }
 
 class MtLoEdge implements ILoEdge {
+    /* Template
+     * 
+     * Fields:
+     * 
+     * Methods:
+     * this.get(Person dst) -- Edge
+     * this.copyStack(DirectedWeightedGraph graph, Stack copy) -- void
+     * this.findAllPaths(DirectedWeightedGraph graph, Person node, Person target) -- void
+     * this.pop(Stack stack) -- Edge
+     * this.isEmpty() -- boolean
+     * this.contains(Edge edge) -- boolean
+     * this.append(ILoEdge edges) -- ILoEdge
+     * this.foldr(double base, MultiplyWeightsCombinator combin) -- double
+     * 
+     * Methods on fields:
+     * 
+     */
+
     public Edge get(Person dst) {
         throw new IllegalArgumentException();
     }
@@ -82,6 +120,23 @@ class MtLoEdge implements ILoEdge {
 }
 
 class MtLoAdjacencyList implements ILoAdjacencyList {
+    /* Template
+     * 
+     * Fields:
+     * 
+     * Methods:
+     * this.contains(Person src) -- boolean
+     * this.addNode(Person src) -- ConsLoAdjacencyList
+     * this.addEdge(Person src, Person dst) -- ILoAdjacencyList
+     * this.addEdges(Person src, ILoBuddy dsts) -- ILoAdjacencyList
+     * this.addEdgesCons(Person src, ConsLoBuddy dsts) -- ILoAdjacencyList
+     * this.addEdgesMt(Person src, MTLoBuddy dsts) -- ILoAdjacencyList
+     * this.getEdge(Person src, Person dst) -- Edge
+     * this.getAllEdges(Person src) -- ILoEdge
+     * 
+     * Methods on fields:
+     * 
+     */
 
     public boolean contains(Person src) {
         return false;
@@ -121,16 +176,40 @@ class MtLoAdjacencyList implements ILoAdjacencyList {
 }
 
 class MtLoDouble implements ILoDouble {
+    /* Template
+     * 
+     * Fields:
+     * 
+     * Methods:
+     * this.maxHelper(double max) -- double
+     * this.max() -- double
+     * 
+     * Methods on fields:
+     * 
+     */
+
     public double maxHelper(double max) {
         return max;
     }
 
     public double max() {
-        throw new IllegalAccessError();
+        throw new IllegalArgumentException();
     }
 }
 
 class MtLoStack implements ILoStack {
+    /* Template
+     * 
+     * Fields:
+     * 
+     * Methods:
+     * this.map(ConvertListToLikelihoods func) -- ILoDouble
+     * this.length() -- int
+     * 
+     * Methods on fields:
+     * 
+     */
+
     public ILoDouble map(ConvertListToLikelihoods func) {
         return new MtLoDouble();
     }

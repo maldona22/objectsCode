@@ -240,7 +240,7 @@ public class ExamplesBuddies {
         ExampleData data = new ExampleData();
         Stack temp = new Stack();
         data.pathKimToJan.stack.copyStack(data.graph, temp);
-        t.checkExpect(temp, data.pathKimToJan);
+        t.checkExpect(temp, new ConsLoEdge(data.kimToLen, new ConsLoEdge(data.lenToJan, new MtLoEdge())));
     }
     
     public void testConsLoEdgeFindAllPaths(Tester t) {
@@ -412,7 +412,7 @@ public class ExamplesBuddies {
     public void testMtLoEdgePop(Tester t) {
         ExampleData data = new ExampleData();
         //(new MtLoEdge()).pop(data.pathKimToJan);
-        t.checkException(new IllegalAccessException(), (new MtLoEdge()), "pop", data.pathKimToJan);
+        t.checkException(new IllegalArgumentException(), (new MtLoEdge()), "pop", data.pathKimToJan);
     }
     
     public void testMtLoEdgeIsEmpty(Tester t) {
@@ -484,7 +484,7 @@ public class ExamplesBuddies {
     }
 
     public void testMtLoDoubleMax(Tester t) {
-        t.checkException(new IllegalAccessException(), (new MtLoDouble()), "max");
+        t.checkException(new IllegalArgumentException(), (new MtLoDouble()), "max");
     }
     
     public void testMtLoStackMapConvertListToLikelihoods(Tester t) {
@@ -550,7 +550,7 @@ public class ExamplesBuddies {
 
     public void testStackPopMt(Tester t) {
         ExampleData data = new ExampleData();
-        t.checkException(new IllegalAccessException(), data.pathKimToJan, "popMt", (new MtLoEdge()));
+        t.checkException(new IllegalArgumentException(), data.pathKimToJan, "popMt", (new MtLoEdge()));
     }
     
     public void testDWGContains(Tester t) {
@@ -609,16 +609,16 @@ public class ExamplesBuddies {
     public void testDWGCopyStackCons(Tester t) {
         ExampleData data = new ExampleData();
         Stack tempStack = new Stack();
-        ConsLoEdge edges = new ConsLoEdge(data.lenToJan, new ConsLoEdge(data.kimToLen, new MtLoEdge()));
+        ConsLoEdge edges = new ConsLoEdge(data.kimToLen, new ConsLoEdge(data.lenToJan, new MtLoEdge()));
         data.graph.copyStackCons(tempStack, edges);
-        t.checkExpect(tempStack, data.pathKimToJan);
+        t.checkExpect(tempStack, new ConsLoEdge(data.kimToLen, new ConsLoEdge(data.lenToJan, new MtLoEdge())));
     }
     
     public void testDWGCopyStack(Tester t) {
         ExampleData data = new ExampleData();
         Stack tempStack = new Stack();
         data.graph.copyStack(tempStack, data.pathKimToJan.stack);
-        t.checkExpect(tempStack, data.pathKimToJan);
+        t.checkExpect(tempStack, new ConsLoEdge(data.kimToLen, new ConsLoEdge(data.lenToJan, new MtLoEdge())));
     }
     
     public void testDWGFindAllPathsHelper(Tester t) {

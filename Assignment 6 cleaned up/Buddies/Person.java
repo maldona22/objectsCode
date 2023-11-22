@@ -1,13 +1,33 @@
 // -------------------------------- Predicates --------------------------------
 
+// Template for making predicates for use in higher order functions
 interface PersonPred {
     public boolean apply(Person person);
 }
 
-
+// Predicate that removes a given person from a list of people
 class DuplicatePersonPred implements PersonPred {
+    /* Template
+     * 
+     * Fields:
+     * this.person -- Person
+     * 
+     * Methods:
+     * this.apply(Person person) -- boolean
+     * 
+     * Methods on fields:
+     * this.person.addBuddy(Person buddy) -- void
+     * this.person.hasDirectBuddy(Person that) -- boolean
+     * this.person.allPartyInvites() -- ILoBuddy
+     * this.person.partyCount() -- int
+     * this.person.countCommonBuddies(Person that) -- int
+     * this.person.hasExtendedBuddy(Person that) -- boolean
+     * this.person.maxLikelihood(Person that) -- double
+     */
+
     Person person;
 
+    // Checks to see if the passed person is the same as this.person
     public boolean apply(Person person) {
         return !this.person.equals(person);
     }
@@ -17,9 +37,34 @@ class DuplicatePersonPred implements PersonPred {
     }
 }
 
+// Predicate that removes a given list of people from another list of people
 class DuplicatePeoplePred implements PersonPred {
+    /* Template
+     * 
+     * Fields:
+     * this.people -- ILoBuddy
+     * 
+     * Methods:
+     * this.apply(Person person) -- boolean
+     * 
+     * Methods on fields:
+     * this.people.append(Person buddy) -- ILoBuddy
+     * this.people.append(ILoBuddy list) -- ILoBuddy
+     * this.people.contains(Person person) -- boolean
+     * this.people.filter(PersonPred pred) -- ILoBuddy
+     * this.people.removeDuplicates() -- ILoBuddy
+     * this.people.foldr(MTLoBuddy base, ExtendedBuddyCombinator combin) -- ILoBuddy
+     * this.people.foldr(MTLoBuddy base, PartyCountCombinator combin) -- ILoBuddy
+     * this.people.foldr(DirectedWeightedGraph base, ConvertToGraphCombinator combin) -- DirectedWeightedGraph
+     * this.people.length() -- int
+     * this.people.isEmpty() -- boolean
+     * this.people.addEdges(ILoAdjacencyList graph, Person src) -- ILoAdjacencyList
+     */
+
     ILoBuddy people;
 
+    // Checks to see if the passed person is the same as anyf of the people
+    // in this.people
     public boolean apply(Person person) {
         return !this.people.contains(person);
     }
@@ -29,9 +74,35 @@ class DuplicatePeoplePred implements PersonPred {
     }
 }
 
+// Predicate that removes everything but a given list of people from a list,
+// "extracting" them from the list
 class ExtractDuplicatePeoplePred implements PersonPred {
+    /* Template
+     * 
+     * Fields:
+     * this.people -- ILoBuddy
+     * 
+     * Methods:
+     * this.apply(Person person) -- boolean
+     * 
+     * Methods on fields:
+     * this.people.append(Person buddy) -- ILoBuddy
+     * this.people.append(ILoBuddy list) -- ILoBuddy
+     * this.people.contains(Person person) -- boolean
+     * this.people.filter(PersonPred pred) -- ILoBuddy
+     * this.people.removeDuplicates() -- ILoBuddy
+     * this.people.foldr(MTLoBuddy base, ExtendedBuddyCombinator combin) -- ILoBuddy
+     * this.people.foldr(MTLoBuddy base, PartyCountCombinator combin) -- ILoBuddy
+     * this.people.foldr(DirectedWeightedGraph base, ConvertToGraphCombinator combin) -- DirectedWeightedGraph
+     * this.people.length() -- int
+     * this.people.isEmpty() -- boolean
+     * this.people.addEdges(ILoAdjacencyList graph, Person src) -- ILoAdjacencyList
+     */
+
     ILoBuddy people;
 
+    // Checks to see if the passed person is the same as anyf of the people
+    // in this.people
     public boolean apply(Person person) {
         return people.contains(person);
     }
@@ -43,9 +114,36 @@ class ExtractDuplicatePeoplePred implements PersonPred {
 
 // -------------------------------- Combinators --------------------------------
 
+// Gets the extended friend list of a person
 class ExtendedBuddyCombinator {
+    /* Template
+     * 
+     * Fields:
+     * this.visited -- ILoBuddy
+     * 
+     * Methods:
+     * this.apply(Person person, ILoBuddy accum) -- ILoBuddy
+     * 
+     * Methods on fields:
+     * this.visited.append(Person buddy) -- ILoBuddy
+     * this.visited.append(ILoBuddy list) -- ILoBuddy
+     * this.visited.contains(Person person) -- boolean
+     * this.visited.filter(PersonPred pred) -- ILoBuddy
+     * this.visited.removeDuplicates() -- ILoBuddy
+     * this.visited.foldr(MTLoBuddy base, ExtendedBuddyCombinator combin) -- ILoBuddy
+     * this.visited.foldr(MTLoBuddy base, PartyCountCombinator combin) -- ILoBuddy
+     * this.visited.foldr(DirectedWeightedGraph base, ConvertToGraphCombinator combin) -- DirectedWeightedGraph
+     * this.visited.length() -- int
+     * this.visited.isEmpty() -- boolean
+     * this.visited.addEdges(ILoAdjacencyList graph, Person src) -- ILoAdjacencyList
+     */
+
     ILoBuddy visited;
 
+    // Recursively combines the buddies of person with their buddies
+    // to create an extended buddies list for person
+    // EFFECT: Mutates this.visited so as to keep track of who has already been processed
+    // thereby preventing cycles and infinite recursion from happening
     public ILoBuddy apply(Person person, ILoBuddy accum) {
         if (person.buddies.filter(new DuplicatePeoplePred(visited)).isEmpty()) {
             visited = visited.append(person);
@@ -64,6 +162,18 @@ class ExtendedBuddyCombinator {
 }
 
 class PartyCountCombinator {
+    /* Template
+     * 
+     * Fields:
+     * 
+     * Methods:
+     * this.apply(Person person, ILoBuddy accum) -- ILoBuddy
+     * 
+     * Methods on fields:
+     * 
+     */
+
+    // Combines the extended buddy trees of each person in this.person.buddies list
     public ILoBuddy apply(Person person, ILoBuddy accum) {
         return accum.append(person)
                     .append(person.buddies.foldr(new MTLoBuddy(), new ExtendedBuddyCombinator()));
@@ -71,6 +181,18 @@ class PartyCountCombinator {
 }
 
 class ConvertToGraphCombinator {
+    /* Template
+     * 
+     * Fields:
+     * 
+     * Methods:
+     * this.apply(Person person, DirectedWeightedGraph accum) -- DirectedWeightedGraph
+     * 
+     * Methods on fields:
+     * 
+     */
+
+     // Adds the person and their buddies as nodes and edges into accum
     public DirectedWeightedGraph apply(Person person, DirectedWeightedGraph accum) {
         return accum.addNode(person)
                     .addEdges(person, person.buddies)
@@ -79,6 +201,18 @@ class ConvertToGraphCombinator {
 }
 
 class MultiplyWeightsCombinator {
+    /* Template
+     * 
+     * Fields:
+     * 
+     * Methods:
+     * this.apply(Edge edge, double accum) -- double
+     * 
+     * Methods on fields:
+     * 
+     */
+
+     // Used to combine all the weights in a path to a target node
     public double apply(Edge edge, double accum) {
         return edge.weight * accum;
     }
@@ -86,15 +220,47 @@ class MultiplyWeightsCombinator {
 
 // -------------------------------- IFuncs --------------------------------
 
-// TODO change test names to ConvertListToLikelihoods
 class ConvertListToLikelihoods {
+    /* Template
+     * 
+     * Fields:
+     * 
+     * Methods:
+     * this.apply(Stack stack) -- double
+     * 
+     * Methods on fields:
+     * 
+     */
+
+    // Used to convert a list of paths stored as stacks into their respective overall
+    // likelihood value
     double apply(Stack stack) {
         return stack.stack.foldr(1, new MultiplyWeightsCombinator());
     }
 }
 
 // -------------------------------- Objects --------------------------------
+
 class Edge {
+    /* Template
+     * 
+     * Fields:
+     * this.dst -- Person
+     * this.weight -- double
+     * 
+     * Methods:
+     * this.dstEquals(Person dst) -- boolean
+     * 
+     * Methods on fields:
+     * this.dst.addBuddy(Person buddy) -- void
+     * this.dst.hasDirectBuddy(Person that) -- boolean
+     * this.dst.allPartyInvites() -- ILoBuddy
+     * this.dst.partyCount() -- int
+     * this.dst.countCommonBuddies(Person that) -- int
+     * this.dst.hasExtendedBuddy(Person that) -- boolean
+     * this.dst.maxLikelihood(Person that) -- double
+     */
+
     Person dst;
     double weight;
 
@@ -103,12 +269,42 @@ class Edge {
         this.weight = weight;
     }
 
+    // Checks to see if a given person is the same as the destination node of this
+    // edge
     boolean dstEquals(Person dst) {
         return this.dst.equals(dst);
     }
 }
 
 class AdjacencyList {
+    /* Template
+     * 
+     * Fields:
+     * this.src -- Person
+     * this.dsts -- ILoEdge
+     * 
+     * Methods:
+     * this.srcEquals(Person src) -- boolean
+     * 
+     * Methods on fields:
+     * this.src.addBuddy(Person buddy) -- void
+     * this.src.hasDirectBuddy(Person that) -- boolean
+     * this.src.allPartyInvites() -- ILoBuddy
+     * this.src.partyCount() -- int
+     * this.src.countCommonBuddies(Person that) -- int
+     * this.src.hasExtendedBuddy(Person that) -- boolean
+     * this.src.maxLikelihood(Person that) -- double
+     * 
+     * this.dsts.get(Person dst) -- Edge
+     * this.dsts.copyStack(DirectedWeightedGraph graph, Stack copy) -- void
+     * this.dsts.findAllPaths(DirectedWeightedGraph graph, Person node, Person target) -- void
+     * this.dsts.pop(Stack stack) -- Edge
+     * this.dsts.isEmpty() -- boolean
+     * this.dsts.contains(Edge edge) -- boolean
+     * this.dsts.append(ILoEdge edges) -- ILoEdge
+     * this.dsts.foldr(double base, MultiplyWeightsCombinator combin) -- double
+     */
+
     Person src;
     ILoEdge dsts;
 
@@ -122,49 +318,128 @@ class AdjacencyList {
         this.dsts = dsts;
     }
 
+    // Checks to see if the given person is the same as the source / starting node of this
+    // Adjacency list
     boolean srcEquals(Person src) {
         return this.src.equals(src);
     }
 }
 
 class Stack {
+    /* Template
+     * 
+     * Fields:
+     * this.stack -- ILoEdge
+     * 
+     * Methods:
+     * this.isEmpty() -- boolean
+     * this.contains(Edge edge) -- boolean
+     * this.push(Edge edge) -- void
+     * this.push(ILoEdge edges) -- void
+     * this.pop() -- Edge
+     * this.popCons() -- Edge
+     * this.popMt() -- Edge
+     * 
+     * Methods on fields:
+     * this.stack.get(Person dst) -- Edge
+     * this.stack.copyStack(DirectedWeightedGraph graph, Stack copy) -- void
+     * this.stack.findAllPaths(DirectedWeightedGraph graph, Person node, Person target) -- void
+     * this.stack.pop(Stack stack) -- Edge
+     * this.stack.isEmpty() -- boolean
+     * this.stack.contains(Edge edge) -- boolean
+     * this.stack.append(ILoEdge edges) -- ILoEdge
+     * this.stack.foldr(double base, MultiplyWeightsCombinator combin) -- double
+     */
     ILoEdge stack;
 
     Stack() {
         this.stack = new MtLoEdge();
     }
 
+    // Checks to see if the stack is empty or not
     public boolean isEmpty() {
         return stack.isEmpty();
     }
 
+    // Checks to see if the given edge is currently contained with the this stack
     public boolean contains(Edge edge) {
         return stack.contains(edge);
     }
 
+    // Pushes the given edge on top of the stack
     public void push(Edge edge) {
         stack = new ConsLoEdge(edge, stack);
     }
 
+    // Pushes the given edges on top of the stack
     public void push(ILoEdge edges) {
         stack = edges.append(stack);
     }
 
+    // double dispatch method to ultimately remove edge from top of stack
     public Edge pop() {
         return stack.pop(this);
     }
 
+    // Removes and returns edge from the top of the stack
     public Edge popCons(ConsLoEdge stack) {
         this.stack = stack.rest;
         return stack.first;
     }
 
+    // Throws an error since a user can't return a value that never existed to begin with
     public Edge popMt(MtLoEdge stack) {
-        throw new IllegalAccessError();
+        throw new IllegalArgumentException();
     }
 }
 
+// Data structure representing the buddies data in the form of a directed
+// weighted cyclic graph
 class DirectedWeightedGraph {
+    /* Template
+     * 
+     * Fields:
+     * this.graph -- ILoAdjacencyList
+     * this.connectionPath -- Stack
+     * this.connectionPaths -- ILoStack
+     * 
+     * Methods:
+     * this.contans(Person src) -- boolean
+     * this.addNode(Person src) -- DirectedWeightedGraph
+     * this.addEdge(Person src, Person dst) -- DirectedWeightedGraph
+     * this.addEdges(Person src, ILoBuddy dsts) -- DirectedWeightedGraph
+     * this.getEdge(Person src, Person dst) -- Edge
+     * this.getAllEdges(Person src) -- ILoEdge
+     * this.copyStackMt(Stack copy, MtLoEdge original) -- void
+     * this.copyStackCons(Stack copy, ConsLoEdge original) -- void
+     * this.copyStack(Stack copy, ILoEdge original) -- void
+     * this.findAllPathsMt(Person node, MtLoEdge nodeSubTrees, Person targetNode) -- void
+     * this.findAllPathsCons(Person node, ConsLoEdge connectedNodes, Person targetNode) -- void
+     * this.findAllPathsHelper(Person node, ILoEdge connectedNodes, Person targetNode) -- void
+     * this.findAllPaths(Person node, Person targetNode) -- ILoStack
+     * 
+     * Methods on fields:
+     * this.graph.contains(Person src) -- boolean
+     * this.graph.addNode(Person src) -- ConsLoAdjacencyList
+     * this.graph.addEdge(Person src, Person dst) -- ILoAdjacencyList
+     * this.graph.addEdges(Person src, ILoBuddy dsts) -- ILoAdjacencyList
+     * this.graph.addEdgesCons(Person src, ConsLoBuddy dsts) -- ILoAdjacencyList
+     * this.graph.addEdgesMt(Person src, MTLoBuddy dsts) -- ILoAdjacencyList
+     * this.graph.getEdge(Person src, Person dst) -- Edge
+     * this.graph.getAllEdges(Person src) -- ILoEdge
+     * 
+     * this.connectionPath.isEmpty() -- boolean
+     * this.connectionPath.contains(Edge edge) -- boolean
+     * this.connectionPath.push(Edge edge) -- void
+     * this.connectionPath.push(ILoEdge edges) -- void
+     * this.connectionPath.pop() -- Edge
+     * this.connectionPath.popCons() -- Edge
+     * this.connectionPath.popMt() -- Edge
+     * 
+     * this.connectionPaths.map(ConvertListToLikelihoods func) -- ILoDouble
+     * this.connectionPaths.length() -- int
+     */
+
     ILoAdjacencyList graph;
     Stack connectionPath;
     ILoStack connectionPaths;
@@ -179,43 +454,56 @@ class DirectedWeightedGraph {
         this.connectionPaths = connectionPaths;
     }
 
+    // Checks to see if the person is contained in any of the nodes in this.graph
     public boolean contains(Person src) {
         return graph.contains(src);
     }
 
+    // Returns a new graph containing a new node containing the person src
     public DirectedWeightedGraph addNode(Person src) {
         return new DirectedWeightedGraph(graph.addNode(src), this.connectionPath, this.connectionPaths);
     }
 
+    // Returns a new graph that contains a new edge between person (node) src and person (node) dst
     public DirectedWeightedGraph addEdge(Person src, Person dst) {
         return new DirectedWeightedGraph(graph.addEdge(src, dst), this.connectionPath, this.connectionPaths);
     }
 
+    // Returns a new graph that contains a new edge between the person (node) src 
+    // and every person (node) within dsts
     public DirectedWeightedGraph addEdges(Person src, ILoBuddy dsts) {
         return new DirectedWeightedGraph(graph.addEdges(src, dsts), this.connectionPath, this.connectionPaths);
     }
 
+    // Returns the edge between person (node) src and person (node) dst
     public Edge getEdge(Person src, Person dst) {
         return graph.getEdge(src, dst);
     }
 
+    // Returns all the edges in which the person (node) src is the source node
     public ILoEdge getAllEdges(Person src) {
         return graph.getAllEdges(src);
     }
 
+    // Finishes the recursion copying the original stack to the new copy
     void copyStackMt(Stack copy, MtLoEdge original) {
         return;
     }
-
+    
+    // Copies the first element of the list of edges original to the new copy of the original stack
+    // EFFECT: Mutates copy and pushes the first element of original onto it
     void copyStackCons(Stack copy, ConsLoEdge original) {
         copy.push(original.first);
         copyStack(copy, original.rest);
     }
 
+    // Copies the internal list of the original stack to a new copy of the stack
+    // EFFECT: Mutates copy to be a reversed version of the original stack
     void copyStack(Stack copy, ILoEdge original) {
         original.copyStack(this, copy);
     }
 
+    // Finishes the recursion traversing the graph
     void findAllPathsMt(Person node, MtLoEdge nodeSubTrees, Person targetNode) {
         return;
     }
@@ -227,6 +515,14 @@ class DirectedWeightedGraph {
     // with the maximum likelihood. If people had different levels of diction and/or hearing 
     // with different people then this would not be the case, however, they always have the same 
     // levels regardless of who they are talking to. 
+
+    // Traverses the graph searching for all the paths to the target node
+    // and saving those paths in the form of stacks in the ILoStack connectionPath
+    // EFFECT: Mutates connectionPath so as to keep track of the path currently being traversed
+    // in the case that it needs to be saved with connectionPaths
+    // EFFECT: Mutates connectionPaths so as to save all found paths to the target node
+    // EFFECT: Creates a temporary stack that will be mutated to become a copy of the current state
+    // of connectionPath
     void findAllPathsCons(Person node, ConsLoEdge connectedNodes, Person targetNode) {
         if (connectedNodes.first.dstEquals(targetNode)) {
             Stack temp = new Stack();
@@ -250,10 +546,14 @@ class DirectedWeightedGraph {
         }
     }
 
+    // Double dispatch method used in finding all the paths between the given node
+    // and target node
     void findAllPathsHelper(Person node, ILoEdge connectedNodes, Person targetNode) {
         connectedNodes.findAllPaths(this, node, targetNode);
     }
 
+    // Returns a list of stacks, each of which contains a path from the node to the
+    // targetNode
     ILoStack findAllPaths(Person node, Person targetNode) {
         // Resetting for each search
         connectionPath = new Stack();
@@ -265,6 +565,37 @@ class DirectedWeightedGraph {
 
 // represents a Person with a user name and a list of buddies
 class Person {
+    /* Template
+     * 
+     * Fields:
+     * this.username -- String
+     * this.buddies -- ILoBuddy
+     * this.diction -- double
+     * this.hearing -- double
+     * 
+     * Methods:
+     * this.addBuddy(Person buddy) -- void
+     * this.hasDirectBuddy(Person that) -- boolean
+     * this.allPartyInvites() -- ILoBuddy
+     * this.partyCount() -- int
+     * this.countCommonBuddies(Person that) -- int
+     * this.hasExtendedBuddy(Person that) -- boolean
+     * this.maxLikelihood(Person that) -- double
+     * 
+     * Methods on fields:
+     * this.buddies.append(Person buddy) -- ILoBuddy
+     * this.buddies.append(ILoBuddy list) -- ILoBuddy
+     * this.buddies.contains(Person person) -- boolean
+     * this.buddies.filter(PersonPred pred) -- ILoBuddy
+     * this.buddies.removeDuplicates() -- ILoBuddy
+     * this.buddies.foldr(MTLoBuddy base, ExtendedBuddyCombinator combin) -- ILoBuddy
+     * this.buddies.foldr(MTLoBuddy base, PartyCountCombinator combin) -- ILoBuddy
+     * this.buddies.foldr(DirectedWeightedGraph base, ConvertToGraphCombinator combin) -- DirectedWeightedGraph
+     * this.buddies.length() -- int
+     * this.buddies.isEmpty() -- boolean
+     * this.buddies.addEdges(ILoAdjacencyList graph, Person src) -- ILoAdjacencyList
+     */
+
     String username;
     ILoBuddy buddies;
 
@@ -296,6 +627,7 @@ class Person {
         return this.buddies.contains(that);
     }
 
+    // Returns the list of every person who will be invited to the party hosted by this person
     ILoBuddy allPartyInvites() {
         return buddies  .foldr(new MTLoBuddy(), new PartyCountCombinator())
                         .append(this)
@@ -342,6 +674,8 @@ class Person {
         }
     }
     
+    // Returns the maximum likelihood that a message from this person
+    // will reach that person
     double maxLikelihood(Person that) {
         // TODO Make sure this returns zero if they're not connected
         DirectedWeightedGraph graph = new DirectedWeightedGraph();
