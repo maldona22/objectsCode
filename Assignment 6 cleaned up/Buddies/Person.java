@@ -637,9 +637,9 @@ class Person {
 
     // Returns the list of every person who will be invited to the party hosted by this person
     ILoBuddy allPartyInvites() {
-        return buddies  .foldr(new MTLoBuddy(), new PartyCountCombinator())
-                        .append(this)
-                        .removeDuplicates();
+        return buddies.foldr(new MTLoBuddy(), new PartyCountCombinator())
+                .append(this)
+                .removeDuplicates();
     }
 
     // returns the number of people who will show up at the party 
@@ -652,8 +652,8 @@ class Person {
     // returns the number of people that are direct buddies 
     // of both this and that person
     int countCommonBuddies(Person that) {
-        return this.buddies .filter(new ExtractDuplicatePeoplePred(that.buddies))
-                            .length();
+        return this.buddies.filter(new ExtractDuplicatePeoplePred(that.buddies))
+                .length();
     }
 
     // will the given person be invited to a party 
@@ -662,112 +662,15 @@ class Person {
         return allPartyInvites().contains(that);
     }
 
-    static void printBuddies(ILoBuddy list) {
-        if (list instanceof ConsLoBuddy) {
-            System.out.println(((ConsLoBuddy) list).first.username);
-            printBuddies(((ConsLoBuddy) list).rest);
-        } else {
-            return;
-        }
-    }
-    
-    static void printEdges(ILoEdge list) {
-        if (list instanceof ConsLoEdge) {
-            System.out.println(((ConsLoEdge) list).first.dst.username);
-            System.out.println(((ConsLoEdge) list).first.weight);
-            printEdges(((ConsLoEdge) list).rest);
-        }
-        else {
-            return;
-        }
-    }
-    
     // Returns the maximum likelihood that a message from this person
     // will reach that person
     double maxLikelihood(Person that) {
         // TODO Make sure this returns zero if they're not connected
         DirectedWeightedGraph graph = new DirectedWeightedGraph();
         return allPartyInvites().foldr(graph, new ConvertToGraphCombinator())
-                                .findAllPaths(this, that)
-                                .map(new ConvertListToLikelihoods())
-                                .max();
+                .findAllPaths(this, that)
+                .map(new ConvertListToLikelihoods())
+                .max();
     }
-    
-    public static void main(String[] args) {
-        Person anne = new Person("Anne", 0.44, 1.00);
-        Person bob = new Person("Bob", 0.61, 0.66);
-        Person cole = new Person("Cole", 0.56, 0.89);
-        Person dan = new Person("Dan", 0.84, 0.86);
-        Person ed = new Person("Ed", 0.44, 0.90);
-        Person fay = new Person("Fay", 0.31, 0.78);
-        Person gabi = new Person("Gabi", 0.96, 0.53);
-        Person hank = new Person("Hank", 0.84, 0.77);
-        Person jan = new Person("Jan", 0.64, 0.99);
-        Person kim = new Person("Kim", 0.56, 0.77);
-        Person len = new Person("Len", 0.53, 0.58);
-        Person jake = new Person("Jake", 0.92, 0.74);
 
-        anne.addBuddy(bob);
-        anne.addBuddy(cole);
-
-        bob.addBuddy(anne);
-        bob.addBuddy(ed);
-        bob.addBuddy(hank);
-
-        cole.addBuddy(dan);
-        cole.addBuddy(jake);
-
-        jake.addBuddy(gabi);
-
-        dan.addBuddy(cole);
-
-        ed.addBuddy(fay);
-
-        fay.addBuddy(ed);
-        fay.addBuddy(gabi);
-
-        gabi.addBuddy(ed);
-        gabi.addBuddy(fay);
-        gabi.addBuddy(jake);
-
-        jan.addBuddy(kim);
-        jan.addBuddy(len);
-
-        kim.addBuddy(jan);
-        kim.addBuddy(len);
-
-        len.addBuddy(kim);
-        len.addBuddy(jan);
-
-        ConsLoBuddy people = new ConsLoBuddy(jake,
-                new ConsLoBuddy(anne, new ConsLoBuddy(bob, new ConsLoBuddy(cole, new ConsLoBuddy(dan,
-                        new ConsLoBuddy(ed, new ConsLoBuddy(fay,
-                                new ConsLoBuddy(gabi, new ConsLoBuddy(kim, new ConsLoBuddy(len,
-                                        new ConsLoBuddy(jan, new ConsLoBuddy(hank, new MTLoBuddy()))))))))))));
-
-        System.out.println("Common friends kim and len: " + kim.countCommonBuddies(len));
-        System.out.println("Common friends kim and hank: " + kim.countCommonBuddies(hank));
-
-        //Person.printBuddies(anne.buddies.foldr(new MTLoBuddy(), new ExtendedBuddyCombinator()));
-
-        System.out.println("------------------\nResult: ");
-        System.out.println(anne.hasExtendedBuddy(hank));
-        System.out.println(anne.partyCount());
-        printBuddies(anne.buddies.foldr(new MTLoBuddy(), new ExtendedBuddyCombinator()));
-        //DFS searcher = new DFS(new ConsLoBuddy(anne, anne.buddies));
-        //System.out.println(searcher.depthFirstSearch(hank).username);
-        System.out.println("------------------\nPath: ");
-        //printBuddies(searcher.dfsPath(hank, anne));
-
-        DirectedWeightedGraph why = new DirectedWeightedGraph();
-        why = people.foldr(why, new ConvertToGraphCombinator());
-        ILoStack paths = why.findAllPaths(anne, gabi);
-        System.out.println(paths.length());
-        //printEdges(((ConsLoStack) ((ConsLoStack) paths).rest).first.stack);
-        System.out.println("------------------\nPath2: ");
-        printEdges(((ConsLoStack) paths).first.stack);
-        System.out.println("------------------\nPath3: ");
-        printEdges( (((ConsLoStack) ((ConsLoStack) paths).rest).first).stack);
-        System.out.println(anne.maxLikelihood(gabi));
-    }
 }
