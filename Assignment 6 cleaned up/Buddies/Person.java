@@ -151,16 +151,17 @@ class ExtendedBuddyCombinator {
         } else {
             visited = visited.append(person);
             return accum.append(person)
-                        .append(person.buddies.filter(new DuplicatePeoplePred(visited))
-                        .foldr(new MTLoBuddy(), this));
+                    .append(person.buddies.filter(new DuplicatePeoplePred(visited))
+                            .foldr(new MTLoBuddy(), this));
         }
     }
-    
+
     ExtendedBuddyCombinator() {
         this.visited = new MTLoBuddy();
     }
 }
 
+// Combinator for foldr that combines all the extended buddies lists into one list
 class PartyCountCombinator {
     /* Template
      * 
@@ -176,10 +177,12 @@ class PartyCountCombinator {
     // Combines the extended buddy trees of each person in this.person.buddies list
     public ILoBuddy apply(Person person, ILoBuddy accum) {
         return accum.append(person)
-                    .append(person.buddies.foldr(new MTLoBuddy(), new ExtendedBuddyCombinator()));
+                .append(person.buddies.foldr(new MTLoBuddy(), new ExtendedBuddyCombinator()));
     }
 }
 
+// Combinator for foldr that converts a list of people and their buddies
+// into nodes and edges for the given graph
 class ConvertToGraphCombinator {
     /* Template
      * 
@@ -192,14 +195,14 @@ class ConvertToGraphCombinator {
      * 
      */
 
-     // Adds the person and their buddies as nodes and edges into accum
+    // Adds the person and their buddies as nodes and edges into accum
     public DirectedWeightedGraph apply(Person person, DirectedWeightedGraph accum) {
         return accum.addNode(person)
-                    .addEdges(person, person.buddies)
-                    ;
+                .addEdges(person, person.buddies);
     }
 }
 
+// Combinator for foldr that calculates the overall likelihood of a given path
 class MultiplyWeightsCombinator {
     /* Template
      * 
@@ -220,6 +223,7 @@ class MultiplyWeightsCombinator {
 
 // -------------------------------- IFuncs --------------------------------
 
+// A function for map that converts a path into a overall likelihood
 class ConvertListToLikelihoods {
     /* Template
      * 
@@ -241,6 +245,7 @@ class ConvertListToLikelihoods {
 
 // -------------------------------- Objects --------------------------------
 
+// A data structure representing the connection between two people in the graph
 class Edge {
     /* Template
      * 
@@ -276,6 +281,8 @@ class Edge {
     }
 }
 
+// A data structure that represents a node and all the nodes it is connected to (edges included)
+// in the graph
 class AdjacencyList {
     /* Template
      * 
@@ -325,6 +332,7 @@ class AdjacencyList {
     }
 }
 
+// A LIFO data structure
 class Stack {
     /* Template
      * 

@@ -41,18 +41,23 @@ class ConsLoBuddy implements ILoBuddy {
         this.rest = rest;
     }
 
+    // Adds the given person, buddy, to the end of this list
     public ILoBuddy append(Person buddy) {
         return new ConsLoBuddy(first, this.rest.append(buddy));
     };
 
+    // Adds the given list of people, list, to the end of this list
     public ILoBuddy append(ILoBuddy list) {
         return new ConsLoBuddy(first, this.rest.append(list));
     }
 
+    // Checks to see if person is contained in this list
     public boolean contains(Person person) {
         return this.first.equals(person) || this.rest.contains(person);
     }
 
+    // Returns a new list with certain people removed depending upon the predicate
+    // passed in
     public ILoBuddy filter(PersonPred pred) {
         if (pred.apply(first)) {
             return new ConsLoBuddy(first, rest.filter(pred));
@@ -61,30 +66,41 @@ class ConsLoBuddy implements ILoBuddy {
         }
     }
 
+    // Removes any duplicates from this list
     public ILoBuddy removeDuplicates() {
         return new ConsLoBuddy(first, rest.filter(new DuplicatePersonPred(first)).removeDuplicates());
     }
 
+    // Accumulates all of the extended buddies into a singular list
     public ILoBuddy foldr(MTLoBuddy base, ExtendedBuddyCombinator combin) {
         return combin.apply(first, this.rest.foldr(base, combin));
     }
 
+    // Accumulates all of the extended buddies of every buddy into a singular list
     public ILoBuddy foldr(MTLoBuddy base, PartyCountCombinator combin) {
         return combin.apply(first, this.rest.foldr(base, combin));
     }
 
+    // Accumulates all the people in this list into the graph in the form of nodes
+    // and edges
     public DirectedWeightedGraph foldr(DirectedWeightedGraph base, ConvertToGraphCombinator combin) {
         return combin.apply(first, this.rest.foldr(base, combin));
     }
 
+    // Returns the length of this list
     public int length() {
         return 1 + this.rest.length();
     }
 
+    // Returns whether this list is empty
+    // Since this is a ConsLoBuddy, it will always return false
     public boolean isEmpty() {
         return false;
     }
     
+    // Double dispatch method
+    // Adds all of the people within this list as destination nodes
+    // for edges starting from src
     public ILoAdjacencyList addEdges(ILoAdjacencyList graph, Person src) {
         return graph.addEdgesCons(src, this);
     }
@@ -127,6 +143,7 @@ class ConsLoEdge implements ILoEdge {
         this.rest = rest;
     }
 
+    // Returns the edge whose destination node is the same as the person dst
     public Edge get(Person dst) {
         if (this.first.dst.equals(dst)) {
             return this.first;
@@ -135,30 +152,42 @@ class ConsLoEdge implements ILoEdge {
         }
     }
 
+    // Double dispatch method
+    // Copies this list into the new copy stack being made
     public void copyStack(DirectedWeightedGraph graph, Stack copy) {
         graph.copyStackCons(copy, this);
     }
 
+    // Double dispatch method
+    // Starts traversal through the graph using the edges held in this list
     public void findAllPaths(DirectedWeightedGraph graph, Person node, Person target) {
         graph.findAllPathsCons(node, this, target);
     }
 
+    // Double dispatch method
+    // Removes and returns the first element held in this list
     public Edge pop(Stack stack) {
         return stack.popCons(this);
     }
 
+    // Checks to see if this list is empty or not
+    // Since this is a ConsLoEdge, it will always return false
     public boolean isEmpty() {
         return false;
     }
 
+    // Checks to see if this list contains the given edge
     public boolean contains(Edge edge) {
         return this.first.equals(edge) || this.rest.contains(edge);
     }
 
+    // Adds the list of edges to the end of this list
     public ILoEdge append(ILoEdge edges) {
         return new ConsLoEdge(first, this.rest.append(edges));
     }
 
+    // Accumulates the weights of the edges within this list into a single overall
+    // likelihood
     public double foldr(double base, MultiplyWeightsCombinator combin) {
         return combin.apply(first, this.rest.foldr(base, combin));
     }
@@ -200,14 +229,18 @@ class ConsLoAdjacencyList implements ILoAdjacencyList {
         this.rest = rest;
     }
 
+    // Checks to see if this list contains the given person src
     public boolean contains(Person src) {
         return this.first.src.equals(src) || this.rest.contains(src);
     }
 
+    // Adds a new adjacency list to this list using the given person src
+    // As its source node
     public ConsLoAdjacencyList addNode(Person src) {
         return new ConsLoAdjacencyList(new AdjacencyList(src), this);
     }
 
+    // Adds an edge between the given source and destination
     public ILoAdjacencyList addEdge(Person src, Person dst) {
         if (this.first.srcEquals(src)) {
             double weight = src.diction * dst.hearing;
@@ -219,19 +252,27 @@ class ConsLoAdjacencyList implements ILoAdjacencyList {
         }
     }
 
+    // Double dispatch method
+    // There is nothing in the destinations list to add, so just return this
     public ILoAdjacencyList addEdgesMt(Person src, MTLoBuddy dsts) {
         return this;
     }
 
+    // Double disatch method
+    // Adds the first person in the list dsts as a new edge to this list
     public ILoAdjacencyList addEdgesCons(Person src, ConsLoBuddy dsts) {
         return this.addEdge(src, dsts.first)
                 .addEdges(src, dsts.rest);
     }
 
+    // Double dispatch method
+    // Adds the people in the dsts as new edges using the given person src as
+    // their source node
     public ILoAdjacencyList addEdges(Person src, ILoBuddy dsts) {
         return dsts.addEdges(this, src);
     }
 
+    // Returns the edge between the given source and destination nodes
     public Edge getEdge(Person src, Person dst) {
         if (this.first.srcEquals(src)) {
             return this.first.dsts.get(dst);
@@ -240,6 +281,7 @@ class ConsLoAdjacencyList implements ILoAdjacencyList {
         }
     }
 
+    // Returns all the edges connected to the given source node
     public ILoEdge getAllEdges(Person src) {
         if (this.first.srcEquals(src)) {
             return this.first.dsts;
@@ -273,6 +315,8 @@ class ConsLoDouble implements ILoDouble {
         this.rest = rest;
     }
 
+    // Compares the first element of this list and the max accumulator
+    // Returns the largest of the two and compares that number with the rest of the list
     public double maxHelper(double max) {
         if (this.first > max) {
             return this.rest.maxHelper(this.first);
@@ -282,6 +326,7 @@ class ConsLoDouble implements ILoDouble {
         }
     }
 
+    // Returns the maximum value held within this list
     public double max() {
         return maxHelper(this.first);
     }
@@ -311,10 +356,13 @@ class ConsLoStack implements ILoStack {
         this.rest = rest;
     }
 
+    // Converts all the paths within the list a list containing all of their respective
+    // overall likelihoods
     public ILoDouble map(ConvertListToLikelihoods func) {
         return new ConsLoDouble(func.apply(this.first), this.rest.map(func));
     }
 
+    // Returns the length of this list
     public int length() {
         return 1 + this.rest.length();
     }
