@@ -35,20 +35,45 @@ public class PermutationCode {
 
     // Initialize the encoding permutation of the characters
     ArrayList<Character> initEncoder() {
+        // Decided to take the approach of shuffling the alphabet
+        // As our way of making a random permutation
         Random rand = new Random();
-        for (int i = alphabet.size(); i >= 0; i--) {
-            swap(alphabet, i, rand.nextInt(i));
+        code = new ArrayList<Character>(Arrays.asList(
+                    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 
+                    'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 
+                    't', 'u', 'v', 'w', 'x', 'y', 'z'));
+        for (int i = code.size(); i >= 0; i--) {
+            swap(code, i, rand.nextInt(i));
         }
-        return this.alphabet; //you should complete this method
+        return this.code;
+    }
+
+    String encodeHelper(String source, String accum) {
+        if (source.isEmpty()) {
+            return accum;
+        } else {
+            char firstChar = source.charAt(0);
+            // TODO figure out what functions jason is ok with us using
+            return accum + code.get(firstChar) + encodeHelper(source.replace(String.valueOf(firstChar), ""), accum);
+        }
     }
 
     // produce an encoded String from the given String
     String encode(String source) {
-        return ""; //you should complete this method
+        return encodeHelper(source, "");
+    }
+
+    String decodeHelper(String code, String accum) {
+        if (code.isEmpty()) {
+            return accum;
+        } else {
+            char firstChar = code.charAt(0);
+            return accum + alphabet.get(firstChar) + decodeHelper(code.replace(String.valueOf(firstChar), ""), accum);
+        }
     }
 
     // produce a decoded String from the given String
     String decode(String code) {
-        return ""; //you should complete this method
+        return decodeHelper(code, "");
     }
 }
