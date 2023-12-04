@@ -1,9 +1,11 @@
 import java.util.*;
+import tester.*;
 
 /**
  * A class that defines a new permutation code, as well as methods for encoding
  * and decoding of the messages that use this code.
  */
+
 public class PermutationCode {
     // The original list of characters to be encoded
     ArrayList<Character> alphabet = 

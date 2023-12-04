@@ -1,4 +1,5 @@
 import javax.management.RuntimeErrorException;
+import tester.*;
 
 interface IPred<T> {
     boolean apply(T t);
@@ -88,8 +89,6 @@ public class Deque<T> {
     int size() {
         return sizeHelper(header.next);
     }
-    // TODO create function that just stitches node in given first to appear in list node
-    // and last to appear in list node
 
     void stitchNodes(ANode<T> firstInList, ANode<T> lastInList) {
         firstInList.next = lastInList;
@@ -105,7 +104,7 @@ public class Deque<T> {
     }
 
     void addAtTail(T data) {
-        Node<T> node = new Node<T>(data, header, header.prev);
+        Node<T> node = new Node<T>(data);
         stitchNodes(header.prev, node);
         stitchNodes(node, header);
         //header.prev.next = node;
@@ -116,7 +115,9 @@ public class Deque<T> {
         if (header.next.equals(header)) {
             throw new RuntimeErrorException(null);
         } else {
+            // TODO use stitchnodes for this
             ANode<T> node = header.next;
+            //stitchNodes(header.next, node);
             node.next.prev = header;
             header.next = node.next;
             return node;
@@ -127,6 +128,7 @@ public class Deque<T> {
         if (header.next.equals(header)) {
             throw new RuntimeErrorException(null);
         } else {
+            // TODO use stitchnodes for this
             ANode<T> node = header.prev;
             node.prev.next = header;
             header.prev = node.prev;
