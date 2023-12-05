@@ -1,6 +1,7 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.HashSet;
 import java.awt.Color;
 
 import javalib.impworld.*;
@@ -15,8 +16,7 @@ class Cell {
   // 5  6  7
   // This is an implementation detail that doesn't need to be remembered by its users
   // Users just use the designated setters and getters
-  // Hence why this is made private
-  private ArrayList<Cell> neighbors;
+  ArrayList<Cell> neighbors;
   boolean hasMine;
   boolean revealed;
   boolean flagged;
@@ -122,7 +122,10 @@ class Cell {
   int numOfMinesAdjacent() {
     int numOfMines = 0;
     for (Cell cell : neighbors) {
-      if (cell.hasMine) {
+      if (cell == null) {
+        continue;
+      }
+      else if (cell.hasMine) {
         numOfMines++;
       }
     }
@@ -252,43 +255,52 @@ class Board {
 }
 
 class ConstProps {
-    final FrozenImage zeroAdjMines = new FrozenImage(new FromFileImage("0.png"));
-    final FrozenImage oneAdjMines = new FrozenImage(new FromFileImage("1.png"));
-    final FrozenImage twoAdjMines = new FrozenImage(new FromFileImage("2.png"));
-    final FrozenImage threeAdjMines = new FrozenImage(new FromFileImage("3.png"));
-    final FrozenImage fourAdjMines = new FrozenImage(new FromFileImage("4.png"));
-    final FrozenImage fiveAdjMines = new FrozenImage(new FromFileImage("5.png"));
-    final FrozenImage sixAdjMines = new FrozenImage(new FromFileImage("6.png"));
-    final FrozenImage sevenAdjMines = new FrozenImage(new FromFileImage("7.png"));
-    final FrozenImage eightAdjMines = new FrozenImage(new FromFileImage("8.png"));
-    final FrozenImage unknownAdjMines = new FrozenImage(new FromFileImage("Unknown.png"));
-    final FrozenImage flag = new FrozenImage(new FromFileImage("Flag.png"));
-    final FrozenImage mine = new FrozenImage(new FromFileImage("Mine.png"));
-
-    final ArrayList<FrozenImage> numberedTileImages = new ArrayList<FrozenImage>(
-            Arrays.asList(zeroAdjMines, oneAdjMines, twoAdjMines, threeAdjMines, fourAdjMines, fiveAdjMines,
-                    sixAdjMines, sevenAdjMines, eightAdjMines));
     // Gonna just hope that everything is done in pixels here since all the pngs
     // above are 15 pixels by 15 pixels
     final int tileWidthInPixels = 15;
     final int tileHeightInPixels = 15;
+    final double tileWidthOffset = -(tileWidthInPixels / 2.0);
+    final double tileHeightOffset = -(tileHeightInPixels / 2.0);
 
+    final FrozenImage zeroAdjMines = new FrozenImage((new FromFileImage("0.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final FrozenImage oneAdjMines = new FrozenImage((new FromFileImage("1.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final FrozenImage twoAdjMines = new FrozenImage((new FromFileImage("2.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final FrozenImage threeAdjMines = new FrozenImage((new FromFileImage("3.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final FrozenImage fourAdjMines = new FrozenImage((new FromFileImage("4.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final FrozenImage fiveAdjMines = new FrozenImage((new FromFileImage("5.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final FrozenImage sixAdjMines = new FrozenImage((new FromFileImage("6.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final FrozenImage sevenAdjMines = new FrozenImage((new FromFileImage("7.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final FrozenImage eightAdjMines = new FrozenImage((new FromFileImage("8.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final FrozenImage unknownAdjMines = new FrozenImage((new FromFileImage("Unknown.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final FrozenImage flag = new FrozenImage((new FromFileImage("Flag.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final FrozenImage mine = new FrozenImage((new FromFileImage("Mine.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+
+    final ArrayList<FrozenImage> numberedTileImages = new ArrayList<FrozenImage>(
+            Arrays.asList(zeroAdjMines, oneAdjMines, twoAdjMines, threeAdjMines, fourAdjMines, fiveAdjMines,
+                    sixAdjMines, sevenAdjMines, eightAdjMines));
+    
     void placeNumberedTileImage(WorldScene scene, int numMinesAdj, int tileX, int tileY) {
       scene.placeImageXY(this.numberedTileImages.get(numMinesAdj),
-          (tileX * this.tileWidthInPixels) + (this.tileWidthInPixels / 2),
-          (tileY * this.tileHeightInPixels) + (this.tileHeightInPixels / 2));
+          (tileX * this.tileWidthInPixels),
+          (tileY * this.tileHeightInPixels));
     }
     
     void placeMineTileImage(WorldScene scene, int tileX, int tileY) {
       scene.placeImageXY(this.mine,
-          (tileX * this.tileWidthInPixels) + (this.tileWidthInPixels / 2),
-          (tileY * this.tileHeightInPixels) + (this.tileHeightInPixels / 2));
+          (tileX * this.tileWidthInPixels),
+          (tileY * this.tileHeightInPixels));
     }
 
     void placeFlagTileImage(WorldScene scene, int tileX, int tileY) {
       scene.placeImageXY(this.flag,
-          (tileX * this.tileWidthInPixels) + (this.tileWidthInPixels / 2),
-          (tileY * this.tileHeightInPixels) + (this.tileHeightInPixels / 2));
+          (tileX * this.tileWidthInPixels),
+          (tileY * this.tileHeightInPixels));
+    }
+
+    void placeUnknownTileImage(WorldScene scene, int tileX, int tileY) {
+      scene.placeImageXY(this.unknownAdjMines,
+          (tileX * this.tileWidthInPixels),
+          (tileY * this.tileHeightInPixels));
     }
 }
 
@@ -308,11 +320,13 @@ class MineSweeperWorld extends World {
     int heightInTiles;
     WorldScene worldScene;
     ConstProps constProps;
+    boolean hitMine;
 
     MineSweeperWorld(int widthInTiles, int heightInTiles, int numMines, ConstProps constProps) {
       this.widthInTiles = widthInTiles;
       this.heightInTiles = heightInTiles;
       this.constProps = constProps;
+      this.hitMine = false;
 
       this.board = new Board(widthInTiles, heightInTiles, numMines);
       this.worldScene = initializeWorldScene();
@@ -322,8 +336,9 @@ class MineSweeperWorld extends World {
         WorldScene newScene = new WorldScene(this.constProps.tileWidthInPixels * board.WIDTH,
             this.constProps.tileHeightInPixels * board.HEIGHT);
         for (int i = 0; i < heightInTiles; i++) {
-            for (int j = 0; j < widthInTiles; j++) {
-                newScene.placeImageXY(constProps.unknownAdjMines, (j * constProps.tileWidthInPixels) + (constProps.tileWidthInPixels / 2), (i * constProps.tileHeightInPixels) + (constProps.tileHeightInPixels / 2));
+          for (int j = 0; j < widthInTiles; j++) {
+              constProps.placeUnknownTileImage(newScene, j, i);
+                //newScene.placeImageXY(constProps.unknownAdjMines, (j * constProps.tileWidthInPixels) + (constProps.tileWidthInPixels / 2), (i * constProps.tileHeightInPixels) + (constProps.tileHeightInPixels / 2));
             }
         }
         return newScene;
@@ -331,7 +346,48 @@ class MineSweeperWorld extends World {
 
     @Override
     public WorldScene makeScene() {
-        return worldScene;
+      return worldScene;
+    }
+    
+    // TODO apparently this also include an outer ring of numbered tiles?
+    // I dont know need to double check
+    public void floodFill(Cell cell, int tileX, int tileY) {
+      Cell topCell = cell.getTopMiddleNeighbor();
+      Cell bottomCell = cell.getBottomMiddleNeighbor();
+      Cell leftCell = cell.getMiddleLeftNeighbor();
+      Cell rightCell = cell.getMiddleRightNeighbor();
+      if (topCell != null) {
+        if (topCell.hasMine == false && !topCell.revealed && topCell.numOfMinesAdjacent() == 0) {
+          topCell.revealed = true;
+          constProps.placeNumberedTileImage(worldScene, 0, tileX,
+              tileY - 1);
+          floodFill(topCell, tileX, tileY - 1);
+        }
+      }
+      if (bottomCell != null) {
+        if (bottomCell.hasMine == false && !bottomCell.revealed && bottomCell.numOfMinesAdjacent() == 0) {
+          bottomCell.revealed = true;
+          constProps.placeNumberedTileImage(worldScene, 0, tileX,
+              tileY + 1);
+          floodFill(bottomCell, tileX, tileY + 1);
+        }
+      }
+      if (leftCell != null) {
+        if (leftCell.hasMine == false && !leftCell.revealed && leftCell.numOfMinesAdjacent() == 0) {
+          leftCell.revealed = true;
+          constProps.placeNumberedTileImage(worldScene, 0, tileX - 1,
+              tileY);
+          floodFill(leftCell, tileX - 1, tileY);
+        }
+      }
+      if (rightCell != null) {
+        if (rightCell.hasMine == false && !rightCell.revealed && rightCell.numOfMinesAdjacent() == 0) {
+          rightCell.revealed = true;
+          constProps.placeNumberedTileImage(worldScene, 0, tileX + 1,
+              tileY);
+          floodFill(rightCell, tileX + 1, tileY );
+        }
+      }
     }
 
     @Override
@@ -340,42 +396,84 @@ class MineSweeperWorld extends World {
       // Means I don't have to do bounds checking? Hopefully?
       int tileX = pos.x / this.constProps.tileWidthInPixels;
       int tileY = pos.y / this.constProps.tileHeightInPixels;
+      // TODO even though it shouldn't be possible maybe just check and make sure the coordinates are
+      // valid just in case
       Cell clickedCell = this.board.initialCell.getCell(tileX, tileY);
-      if (clickedCell.flagged) {
-        return;
-      } else if (clickedCell.hasMine == false) {
-        // TODO display number png
-        int numMinesAdj = clickedCell.numOfMinesAdjacent();
-        // TODO Need to check if I can just place an image over another image
-        // or if I need to specifically call a modifying function
-        constProps.placeNumberedTileImage(worldScene, numMinesAdj, tileX, tileY);
-        //worldScene.placeImageXY(constProps.numberedTileImages.get(numMinesAdj), tileX * constProps.tileWidthInPixels,
-            //tileY * constProps.tileHeightInPixels);
-      } else if (clickedCell.hasMine) {
-        // TODO Call game over code
-        constProps.placeMineTileImage(worldScene, tileX, tileY);
-      } else {
-        try {
-          throw new MouseClickException("Invalid data in cell clicked");
-        } catch (MouseClickException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-          System.exit(1);
+      if (buttonPressed.equals("LeftButton")) {
+        if (clickedCell.flagged) {
+          return;
+        } else if (clickedCell.hasMine == false) {
+          clickedCell.revealed = true;
+          constProps.placeNumberedTileImage(worldScene, clickedCell.numOfMinesAdjacent(), tileX, tileY);
+          floodFill(clickedCell, tileX, tileY);
+        } else if (clickedCell.hasMine) {
+          clickedCell.revealed = true;
+          constProps.placeMineTileImage(worldScene, tileX, tileY);
+          hitMine = true;
+        } else {
+          try {
+            throw new MouseClickException("Invalid data in cell clicked");
+          } catch (MouseClickException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            System.exit(1);
+          }
         }
+      } else if (buttonPressed.equals("RightButton")) {
+        if (!clickedCell.revealed) {
+          if (clickedCell.flagged) {
+            clickedCell.flagged = false;
+            constProps.placeUnknownTileImage(worldScene, tileX, tileY);
+          } else {
+            clickedCell.flagged = true;
+            constProps.placeFlagTileImage(worldScene, tileX, tileY);
+          }
+        }
+      }
+    }
+    
+    public boolean gameWon(Cell cell, HashSet<Cell> visited) {
+      boolean result = true;
+      result = (result && (cell.revealed || cell.hasMine));
+      for (Cell neighbor : cell.neighbors) {
+        if (neighbor != null) {
+          if (!visited.contains(neighbor)) {
+            result = (result && (neighbor.revealed || neighbor.hasMine));
+            visited.add(neighbor);
+            result = result && gameWon(neighbor, visited);
+          }
+        }
+      }
+      return result;
+    }
+
+    @Override
+    public WorldEnd worldEnds() {
+      if (hitMine) {
+        worldScene.placeImageXY(new TextImage("You Lost", 28, new Color(0, 0, 0)),
+            (widthInTiles * constProps.tileWidthInPixels) / 2, (heightInTiles * constProps.tileHeightInPixels) / 2);
+        return new WorldEnd(true, worldScene);
+      } 
+      else if (gameWon(board.initialCell, new HashSet<Cell>())) {
+        worldScene.placeImageXY(new TextImage("You Won", 28, new Color(0, 0, 0)),
+            (widthInTiles * constProps.tileWidthInPixels) / 2, (heightInTiles * constProps.tileHeightInPixels) / 2);
+        return new WorldEnd(true, worldScene);
+      } else {
+        return new WorldEnd(false, this.makeScene());
       }
     }
 }
 
 public class MineSweeper {
-
   static void runGame(int tileWidth, int tileHeight, int numMines) {
     ConstProps constProps = new ConstProps();
     MineSweeperWorld gameWorld = new MineSweeperWorld(tileWidth, tileHeight, numMines, constProps);
     int pixelWidth = tileWidth * constProps.tileWidthInPixels;
     int pixelHeight = tileHeight * constProps.tileHeightInPixels;
-    gameWorld.bigBang(pixelWidth, pixelHeight);
+    gameWorld.bigBang(pixelWidth, pixelHeight, 1);
   }
+
   public static void main(String[] args) {
-    runGame(16, 30, 99);
+    runGame(30, 16, 99);
   }
 }
