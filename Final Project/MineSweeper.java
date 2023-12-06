@@ -15,8 +15,10 @@ class Cell {
   // 3  X  4
   // 5  6  7
   // This is an implementation detail that doesn't need to be remembered by its users
-  // Users just use the designated setters and getters
+  // Users just use the designated setters and getters, or the neighbors iterator when
+  // the location around the cell is irrelevant
   ArrayList<Cell> neighbors;
+  int numOfMinesAdjacent;
   boolean hasMine;
   boolean revealed;
   boolean flagged;
@@ -29,6 +31,7 @@ class Cell {
     for (int i = 0; i < 8; i++) {
       neighbors.add(i, null);
     }
+
     this.hasMine = false;
     this.flagged = false;
     this.revealed = false;
@@ -66,12 +69,6 @@ class Cell {
     neighbors.set(4, cell);
   }
 
-  // Ones I probably wont need as much
-  // TODO remember to desiginate all the random getters and setters that arent the normals
-  // for testing only?
-  // Actually maybe its just better to delete the ones that aren't used
-  // and call it a day
-
   Cell getTopLeftNeighbor() {
     return neighbors.get(0);
   }
@@ -104,11 +101,6 @@ class Cell {
     neighbors.set(7, cell);
   }
 
-  // TODO test the everliving fuck outta this shit
-  // I strongly suspect this code isn't actually correct
-  // and only seems to work
-  // I think the repeatable case is clicking the bottom most right most cell always crashes
-  // I think anyways
   Cell getCell(int x, int y) {
     if (y > 0) {
       return this.getBottomMiddleNeighbor().getCell(x, y - 1);
@@ -133,18 +125,13 @@ class Cell {
   }
 }
 
-// TODO Figure out if this class even needs to exist?
-// A cell kinda already is a board in of itself
-// Maybe I should just put this all into the cell class?
-// Might be a bad idea if I use sentinels though
-// Give it some thought
+// Acting as a sentinel of sorts for the first cell in the game board
 class Board {
   // TODO I hacked this together initially using these values instead of the ones held
   // in the world struct, double check all usages of WIDTH and HEIGHT and remove
   // in appropriate ones
     final int WIDTH;
     final int HEIGHT;
-    // TODO Maybe change this into a sentinel so that getCell works properly?
     Cell initialCell;
 
     Board(int width, int height, int numMines) {
@@ -218,7 +205,6 @@ class Board {
       topRow = bottomRow;
     } 
   }
-  // TODO should this be placed into constprops instead?
 
     private <T> void swap(ArrayList<T> list, final int indexA, final int indexB) {
         T temp = list.get(indexA);
@@ -251,56 +237,113 @@ class Board {
           int x = boardAsInts.get(i) % WIDTH;
           initialCell.getCell(x, y).hasMine = true;
         }
+        
+        for (int i = 0; i < HEIGHT; i++) {
+          for (int j = 0; j < WIDTH; j++) {
+            Cell currentCell  = initialCell.getCell(j, i);
+            currentCell.numOfMinesAdjacent = currentCell.numOfMinesAdjacent();
+          }
+        }
     }
 }
 
-class ConstProps {
-    // Gonna just hope that everything is done in pixels here since all the pngs
-    // above are 15 pixels by 15 pixels
-    final int tileWidthInPixels = 15;
-    final int tileHeightInPixels = 15;
-    final double tileWidthOffset = -(tileWidthInPixels / 2.0);
-    final double tileHeightOffset = -(tileHeightInPixels / 2.0);
+final class ConstProps {
+    final static int numberedTileWidthInPixels = 24;
+    final static int numberedTileHeightInPixels = 24;
+    final static int heightScoreboardBackground = 48;
+    final static Color scoreboardBackgroundColor = new Color(192, 192, 192);
 
-    final FrozenImage zeroAdjMines = new FrozenImage((new FromFileImage("0.png")).movePinhole(tileWidthOffset, tileHeightOffset));
-    final FrozenImage oneAdjMines = new FrozenImage((new FromFileImage("1.png")).movePinhole(tileWidthOffset, tileHeightOffset));
-    final FrozenImage twoAdjMines = new FrozenImage((new FromFileImage("2.png")).movePinhole(tileWidthOffset, tileHeightOffset));
-    final FrozenImage threeAdjMines = new FrozenImage((new FromFileImage("3.png")).movePinhole(tileWidthOffset, tileHeightOffset));
-    final FrozenImage fourAdjMines = new FrozenImage((new FromFileImage("4.png")).movePinhole(tileWidthOffset, tileHeightOffset));
-    final FrozenImage fiveAdjMines = new FrozenImage((new FromFileImage("5.png")).movePinhole(tileWidthOffset, tileHeightOffset));
-    final FrozenImage sixAdjMines = new FrozenImage((new FromFileImage("6.png")).movePinhole(tileWidthOffset, tileHeightOffset));
-    final FrozenImage sevenAdjMines = new FrozenImage((new FromFileImage("7.png")).movePinhole(tileWidthOffset, tileHeightOffset));
-    final FrozenImage eightAdjMines = new FrozenImage((new FromFileImage("8.png")).movePinhole(tileWidthOffset, tileHeightOffset));
-    final FrozenImage unknownAdjMines = new FrozenImage((new FromFileImage("Unknown.png")).movePinhole(tileWidthOffset, tileHeightOffset));
-    final FrozenImage flag = new FrozenImage((new FromFileImage("Flag.png")).movePinhole(tileWidthOffset, tileHeightOffset));
-    final FrozenImage mine = new FrozenImage((new FromFileImage("Mine.png")).movePinhole(tileWidthOffset, tileHeightOffset));
+    final static FromFileImage scoreboardBottomBorderSegment = new FromFileImage("ScoreboardBottomBorderSegment.png");
+    final static FromFileImage scoreboardTopBorderSegment = new FromFileImage("ScoreboardTopBorderSegment.png");
+    final static FromFileImage scoreboardLeftBorderSegment = new FromFileImage("ScoreboardLeftBorder.png");
+    final static FromFileImage scoreboardRightBorderSegment = new FromFileImage("ScoreboardRightBorder.png");
 
-    final ArrayList<FrozenImage> numberedTileImages = new ArrayList<FrozenImage>(
+    final static FromFileImage scoreboardMineCounterZero = new FromFileImage("Scoreboard0.png");
+    final static FromFileImage scoreboardMineCounterOne = new FromFileImage("Scoreboard1.png");
+    final static FromFileImage scoreboardMineCounterTwo = new FromFileImage("Scoreboard2.png");
+    final static FromFileImage scoreboardMineCounterThree = new FromFileImage("Scoreboard3.png");
+    final static FromFileImage scoreboardMineCounterFour = new FromFileImage("Scoreboard4.png");
+    final static FromFileImage scoreboardMineCounterFive = new FromFileImage("Scoreboard5.png");
+    final static FromFileImage scoreboardMineCounterSix = new FromFileImage("Scoreboard6.png");
+    final static FromFileImage scoreboardMineCounterSeven = new FromFileImage("Scoreboard7.png");
+    final static FromFileImage scoreboardMineCounterEight = new FromFileImage("Scoreboard8.png");
+    final static FromFileImage scoreboardMineCounterNine = new FromFileImage("Scoreboard9.png");
+
+    final static ArrayList<FromFileImage> mineCounterImages = new ArrayList<FromFileImage>(Arrays.asList(scoreboardMineCounterZero, scoreboardMineCounterOne, scoreboardMineCounterTwo, scoreboardMineCounterThree, scoreboardMineCounterFour, scoreboardMineCounterFive, scoreboardMineCounterSix, scoreboardMineCounterSeven, scoreboardMineCounterEight, scoreboardMineCounterNine));
+
+    final static FromFileImage tileLeftBorderSegment = new FromFileImage("TileLeftBorderSegment.png");
+    final static FromFileImage tileRightBorderSegment = new FromFileImage("TileRightBorderSegment.png");
+    final static FromFileImage tileBottomBorderLeftCorner = new FromFileImage("TileLeftBorderBottomCorner.png");
+    final static FromFileImage tileBottomBorderRightCorner = new FromFileImage("TileRightBorderBottomCorner.png");
+    final static FromFileImage tileBottomBorderSegment = new FromFileImage("TileBottomBorderSegment.png");
+
+    final static FromFileImage smileUnpressed = new FromFileImage("SmileUnpressed.png");
+    final static FromFileImage smilePressed = new FromFileImage("SmilePressed.png");
+    final static FromFileImage smileClick = new FromFileImage("SmileTilePressed.png");
+    final static FromFileImage smileLost = new FromFileImage("SmileLost.png");
+    final static FromFileImage smileWon = new FromFileImage("SmileWon.png");
+
+    final static FromFileImage zeroAdjMines = new FromFileImage("0.png");
+    final static FromFileImage oneAdjMines = new FromFileImage("1.png");
+    final static FromFileImage twoAdjMines = new FromFileImage("2.png");
+    final static FromFileImage threeAdjMines = new FromFileImage("3.png");
+    final static FromFileImage fourAdjMines = new FromFileImage("4.png");
+    final static FromFileImage fiveAdjMines = new FromFileImage("5.png");
+    final static FromFileImage sixAdjMines = new FromFileImage("6.png");
+    final static FromFileImage sevenAdjMines = new FromFileImage("7.png");
+    final static FromFileImage eightAdjMines = new FromFileImage("8.png");
+    final static FromFileImage unknownAdjMines = new FromFileImage("Unknown.png");
+
+    final static ArrayList<FromFileImage> numberedTileImages = new ArrayList<FromFileImage>(
             Arrays.asList(zeroAdjMines, oneAdjMines, twoAdjMines, threeAdjMines, fourAdjMines, fiveAdjMines,
-                    sixAdjMines, sevenAdjMines, eightAdjMines));
+            sixAdjMines, sevenAdjMines, eightAdjMines));
     
-    void placeNumberedTileImage(WorldScene scene, int numMinesAdj, int tileX, int tileY) {
-      scene.placeImageXY(this.numberedTileImages.get(numMinesAdj),
-          (tileX * this.tileWidthInPixels),
-          (tileY * this.tileHeightInPixels));
-    }
+    final static FromFileImage flag = new FromFileImage("Flag.png");
+    final static FromFileImage unflaggedMine = new FromFileImage("MineUnflagged.png");
+    final static FromFileImage flaggedMine = new FromFileImage("MineFlagged.png");
+    final static FromFileImage detonatedMine = new FromFileImage("Detonated.png");
     
-    void placeMineTileImage(WorldScene scene, int tileX, int tileY) {
-      scene.placeImageXY(this.mine,
-          (tileX * this.tileWidthInPixels),
-          (tileY * this.tileHeightInPixels));
+    // TODO optimize this so I don't have a billion if statements
+    static WorldImage determineImageFromCell(Cell cell) {
+      // Fix this to only handle valid cases and the else throwing a exception
+      if (cell.revealed) {
+        if (cell.hasMine == false) {
+          return numberedTileImages.get(cell.numOfMinesAdjacent);
+        } else {
+          return detonatedMine;
+        }
+      } else if (cell.flagged) {
+        return flag;
+      } else if (cell.revealed == false) {
+        return unknownAdjMines;
+      } else {
+        throw new IllegalArgumentException();
+      }
     }
 
-    void placeFlagTileImage(WorldScene scene, int tileX, int tileY) {
-      scene.placeImageXY(this.flag,
-          (tileX * this.tileWidthInPixels),
-          (tileY * this.tileHeightInPixels));
-    }
-
-    void placeUnknownTileImage(WorldScene scene, int tileX, int tileY) {
-      scene.placeImageXY(this.unknownAdjMines,
-          (tileX * this.tileWidthInPixels),
-          (tileY * this.tileHeightInPixels));
+    static WorldImage gameLostDetermineImageFromCell(Cell cell) {
+      // Fix this to only handle valid cases and the else throwing a exception
+      if (cell.hasMine) {
+        if(cell.revealed == false) {
+          if(cell.flagged) {
+            return flaggedMine;
+          }
+          else {
+            return unflaggedMine;
+          }
+        }
+        else {
+          return detonatedMine;
+        }
+      } else if (cell.flagged) {
+        return flag;
+      } else if (cell.revealed == false) {
+        return unknownAdjMines;
+      } else if (cell.revealed) {
+        return numberedTileImages.get(cell.numOfMinesAdjacent);
+      } else {
+        throw new IllegalArgumentException();
+      }
     }
 }
 
@@ -317,98 +360,268 @@ class MouseClickException extends Exception {
 class MineSweeperWorld extends World {
     Board board;
     int widthInTiles;
+    int widthInPixels;
     int heightInTiles;
+    int heightInPixels;
+    int numMines;
+    double tickRate;
+    double timer;
+    int displayedTime;
+    boolean timeStart;
+    int numberFlagged;
+    boolean mouseClicked;
     WorldScene worldScene;
-    ConstProps constProps;
     boolean hitMine;
 
-    MineSweeperWorld(int widthInTiles, int heightInTiles, int numMines, ConstProps constProps) {
+    MineSweeperWorld(int widthInTiles, int widthInPixels, int heightInTiles, int heightInPixels, int numMines, double tickRate) {
       this.widthInTiles = widthInTiles;
+      this.widthInPixels = widthInPixels;
       this.heightInTiles = heightInTiles;
-      this.constProps = constProps;
+      this.heightInPixels = heightInPixels;
       this.hitMine = false;
+      this.numMines = numMines;
+      this.mouseClicked = false;
+      this.tickRate = tickRate;
+      this.timer = 0.0;
+      this.displayedTime = 0;
+      this.numberFlagged = 0;
 
       this.board = new Board(widthInTiles, heightInTiles, numMines);
       this.worldScene = initializeWorldScene();
     }
 
     public WorldScene initializeWorldScene() {
-        WorldScene newScene = new WorldScene(this.constProps.tileWidthInPixels * board.WIDTH,
-            this.constProps.tileHeightInPixels * board.HEIGHT);
-        for (int i = 0; i < heightInTiles; i++) {
-          for (int j = 0; j < widthInTiles; j++) {
-              constProps.placeUnknownTileImage(newScene, j, i);
-                //newScene.placeImageXY(constProps.unknownAdjMines, (j * constProps.tileWidthInPixels) + (constProps.tileWidthInPixels / 2), (i * constProps.tileHeightInPixels) + (constProps.tileHeightInPixels / 2));
-            }
+      WorldScene newScene = new WorldScene(widthInPixels, heightInPixels);
+      newScene.placeImageXY(
+          new RectangleImage(widthInPixels, heightInPixels, OutlineMode.SOLID, new Color(255, 255, 255)),
+          widthInPixels / 2, heightInPixels / 2);
+      return newScene;
+    }
+
+    BesideImage createScoreboardTopBorder() {
+      BesideImage scoreBoardTopBorder;
+      scoreBoardTopBorder = new BesideImage(ConstProps.scoreboardTopBorderSegment,
+          ConstProps.scoreboardTopBorderSegment);
+      for (int j = 2; j < widthInTiles; j++) {
+        scoreBoardTopBorder = new BesideImage(scoreBoardTopBorder, ConstProps.scoreboardTopBorderSegment);
+      }
+      return scoreBoardTopBorder;
+    }
+    
+    BesideImage createScoreboardBottomBorder() {
+      BesideImage scoreboardBottomBorder;
+      scoreboardBottomBorder = new BesideImage(ConstProps.scoreboardBottomBorderSegment,
+          ConstProps.scoreboardBottomBorderSegment);
+      for (int j = 2; j < widthInTiles; j++) {
+        scoreboardBottomBorder = new BesideImage(scoreboardBottomBorder, ConstProps.scoreboardBottomBorderSegment);
+      }
+      return scoreboardBottomBorder;
+    }
+
+    int getNthDigit(int num, int nthPos) {
+      return (int) ((num / Math.pow(10, nthPos - 1)) % 10);
+    }
+
+    // TODO add check in runGame to make sure number of mines doesn't exceed triple digits?
+    // TODO need to add check to make sure that numberFlagged doesn't exceed numMines
+    BesideImage createScoreboardMineCounter() {
+      // In reverse order
+      WorldImage firstDigit = ConstProps.mineCounterImages.get(getNthDigit(numMines - numberFlagged, 3));
+      WorldImage secondDigit = ConstProps.mineCounterImages.get(getNthDigit(numMines - numberFlagged, 2));
+      WorldImage thirdDigit = ConstProps.mineCounterImages.get(getNthDigit(numMines - numberFlagged, 1));
+      return new BesideImage(firstDigit, secondDigit, thirdDigit);
+    }
+
+    BesideImage createScoreboardTimer() {
+      // In reverse order
+      WorldImage firstDigit = ConstProps.mineCounterImages.get(getNthDigit(displayedTime, 3));
+      WorldImage secondDigit = ConstProps.mineCounterImages.get(getNthDigit(displayedTime, 2));
+      WorldImage thirdDigit = ConstProps.mineCounterImages.get(getNthDigit(displayedTime, 1));
+      return new BesideImage(firstDigit, secondDigit, thirdDigit);
+    }
+
+    BesideImage createScoreboard() {
+      RectangleImage scoreboardBackground = new RectangleImage((widthInTiles * ConstProps.numberedTileWidthInPixels),
+          ConstProps.heightScoreboardBackground, OutlineMode.SOLID,
+          ConstProps.scoreboardBackgroundColor);
+      OverlayImage smile = mouseClicked ? new OverlayImage(ConstProps.smileClick, scoreboardBackground)
+          : new OverlayImage(ConstProps.smileUnpressed, scoreboardBackground);
+      BesideImage mineCounter = createScoreboardMineCounter();
+      OverlayOffsetImage mineCounterWithSmile = new OverlayOffsetImage(mineCounter,
+          (scoreboardBackground.getWidth() / 2.0) - (mineCounter.getWidth() / 2.0) - 9, 0, smile);
+      BesideImage timer = createScoreboardTimer();
+      OverlayOffsetImage mineCounterWithSmileAndTimer = new OverlayOffsetImage(timer, -((scoreboardBackground.getWidth() / 2.0) - (mineCounter.getWidth() / 2.0) - 9), 0, mineCounterWithSmile);
+      BesideImage scoreBoard = new BesideImage(ConstProps.scoreboardLeftBorderSegment,
+          new AboveImage(createScoreboardTopBorder(), mineCounterWithSmileAndTimer, createScoreboardBottomBorder()),
+          ConstProps.scoreboardRightBorderSegment);
+      return scoreBoard;
+    }
+
+    BesideImage createLostScoreboard() {
+      RectangleImage scoreboardBackground = new RectangleImage((widthInTiles * ConstProps.numberedTileWidthInPixels),
+          ConstProps.heightScoreboardBackground, OutlineMode.SOLID,
+          ConstProps.scoreboardBackgroundColor);
+      OverlayImage smile = new OverlayImage(ConstProps.smileLost, scoreboardBackground);
+      BesideImage mineCounter = createScoreboardMineCounter();
+      OverlayOffsetImage mineCounterWithSmile = new OverlayOffsetImage(mineCounter,
+          (scoreboardBackground.getWidth() / 2.0) - (mineCounter.getWidth() / 2.0) - 9, 0, smile);
+      BesideImage timer = createScoreboardTimer();
+      OverlayOffsetImage mineCounterWithSmileAndTimer = new OverlayOffsetImage(timer, -((scoreboardBackground.getWidth() / 2.0) - (mineCounter.getWidth() / 2.0) - 9), 0, mineCounterWithSmile);
+      BesideImage scoreBoard = new BesideImage(ConstProps.scoreboardLeftBorderSegment,
+          new AboveImage(createScoreboardTopBorder(), mineCounterWithSmileAndTimer, createScoreboardBottomBorder()),
+          ConstProps.scoreboardRightBorderSegment);
+      return scoreBoard;
+    }
+    
+    AboveImage createTileRows() {
+      Cell currentRowCell = board.initialCell;
+      Cell currentColumnCell = board.initialCell;
+      AboveImage tileRows = new AboveImage(createScoreboard());
+      for (int i = 0; i < heightInTiles; i++) {
+        BesideImage tileRow = new BesideImage(ConstProps.determineImageFromCell(currentColumnCell));
+        for (int j = 1; j < widthInTiles; j++) {
+          currentColumnCell = currentColumnCell.getMiddleRightNeighbor();
+          tileRow = new BesideImage(tileRow, ConstProps.determineImageFromCell(currentColumnCell));
         }
-        return newScene;
+        tileRow = new BesideImage(ConstProps.tileLeftBorderSegment, tileRow, ConstProps.tileRightBorderSegment);
+        tileRows = new AboveImage(tileRows, tileRow);
+        currentRowCell = currentRowCell.getBottomMiddleNeighbor();
+        currentColumnCell = currentRowCell;
+      }
+      return tileRows;
+    }
+
+    AboveImage createLostTileRows() {
+      Cell currentRowCell = board.initialCell;
+      Cell currentColumnCell = board.initialCell;
+      AboveImage tileRows = new AboveImage(createLostScoreboard());
+      for (int i = 0; i < heightInTiles; i++) {
+        BesideImage tileRow = new BesideImage(ConstProps.gameLostDetermineImageFromCell(currentColumnCell));
+        for (int j = 1; j < widthInTiles; j++) {
+          currentColumnCell = currentColumnCell.getMiddleRightNeighbor();
+          tileRow = new BesideImage(tileRow, ConstProps.gameLostDetermineImageFromCell(currentColumnCell));
+        }
+        tileRow = new BesideImage(ConstProps.tileLeftBorderSegment, tileRow, ConstProps.tileRightBorderSegment);
+        tileRows = new AboveImage(tileRows, tileRow);
+        currentRowCell = currentRowCell.getBottomMiddleNeighbor();
+        currentColumnCell = currentRowCell;
+      }
+      return tileRows;
+    }
+
+    BesideImage createBottomBorder() {
+      BesideImage lastRow = new BesideImage(ConstProps.tileBottomBorderSegment);
+      for (int i = 1; i < widthInTiles; i++) {
+        lastRow = new BesideImage(lastRow, ConstProps.tileBottomBorderSegment);
+      }
+      lastRow = new BesideImage(ConstProps.tileBottomBorderLeftCorner, lastRow, ConstProps.tileBottomBorderRightCorner);
+      return lastRow;
+    }
+    
+    AboveImage createGameBoardImage() {
+      return new AboveImage(createTileRows(), createBottomBorder());
+    }
+
+    AboveImage createLostGameBoardImage() {
+      return new AboveImage(createLostTileRows(), createBottomBorder());
+    }
+
+    @Override
+    public void onTick() {
+      if (timeStart) {
+        timer = timer + tickRate;
+        if (timer / (1 / tickRate) >= 1) {
+          displayedTime = displayedTime + 1;
+          timer = 0.0;
+        }
+      }
     }
 
     @Override
     public WorldScene makeScene() {
+      worldScene.placeImageXY(createGameBoardImage(),
+          widthInPixels / 2,
+          heightInPixels/ 2);
       return worldScene;
     }
     
-    // TODO apparently this also include an outer ring of numbered tiles?
-    // I dont know need to double check
-    public void floodFill(Cell cell, int tileX, int tileY) {
+    // TODO does this only happen if the clicked tile has zero mines around it?
+    // or does it happen for every tile?
+    public void floodFill(Cell cell) {
       Cell topCell = cell.getTopMiddleNeighbor();
       Cell bottomCell = cell.getBottomMiddleNeighbor();
       Cell leftCell = cell.getMiddleLeftNeighbor();
       Cell rightCell = cell.getMiddleRightNeighbor();
       if (topCell != null) {
-        if (topCell.hasMine == false && !topCell.revealed && topCell.numOfMinesAdjacent() == 0) {
+        if (topCell.hasMine == false && !topCell.revealed) {
           topCell.revealed = true;
-          constProps.placeNumberedTileImage(worldScene, 0, tileX,
-              tileY - 1);
-          floodFill(topCell, tileX, tileY - 1);
+          if (topCell.numOfMinesAdjacent == 0) {
+            floodFill(topCell);
+          }
         }
       }
       if (bottomCell != null) {
-        if (bottomCell.hasMine == false && !bottomCell.revealed && bottomCell.numOfMinesAdjacent() == 0) {
+        if (bottomCell.hasMine == false && !bottomCell.revealed) {
           bottomCell.revealed = true;
-          constProps.placeNumberedTileImage(worldScene, 0, tileX,
-              tileY + 1);
-          floodFill(bottomCell, tileX, tileY + 1);
+          if (bottomCell.numOfMinesAdjacent == 0) {
+            floodFill(bottomCell);
+          }
         }
       }
       if (leftCell != null) {
-        if (leftCell.hasMine == false && !leftCell.revealed && leftCell.numOfMinesAdjacent() == 0) {
+        if (leftCell.hasMine == false && !leftCell.revealed) {
           leftCell.revealed = true;
-          constProps.placeNumberedTileImage(worldScene, 0, tileX - 1,
-              tileY);
-          floodFill(leftCell, tileX - 1, tileY);
+          if (leftCell.numOfMinesAdjacent == 0) {
+            floodFill(leftCell);
+          }
         }
       }
       if (rightCell != null) {
-        if (rightCell.hasMine == false && !rightCell.revealed && rightCell.numOfMinesAdjacent() == 0) {
+        if (rightCell.hasMine == false && !rightCell.revealed) {
           rightCell.revealed = true;
-          constProps.placeNumberedTileImage(worldScene, 0, tileX + 1,
-              tileY);
-          floodFill(rightCell, tileX + 1, tileY );
+          if (rightCell.numOfMinesAdjacent == 0) {
+            floodFill(rightCell);
+          }
         }
       }
     }
 
     @Override
+    public void onMousePressed(Posn pos, String buttonPressed) {
+      if (buttonPressed.equals("LeftButton")) {
+        mouseClicked = true;
+      }
+    }
+
+    @Override
+    public void onMouseReleased(Posn pos, String buttonPressed) {
+      if (buttonPressed.equals("LeftButton")) {
+        mouseClicked = false;
+      }
+    }
+
+    @Override
     public void onMouseClicked(Posn pos, String buttonPressed) {
-      // Intentionally doing integer division here, want the results truncated
-      // Means I don't have to do bounds checking? Hopefully?
-      int tileX = pos.x / this.constProps.tileWidthInPixels;
-      int tileY = pos.y / this.constProps.tileHeightInPixels;
+      int tileX = (int) (pos.x - ConstProps.tileLeftBorderSegment.getWidth()) / ConstProps.numberedTileWidthInPixels;
+      int tileY = (int) (pos.y - ConstProps.heightScoreboardBackground
+          - ConstProps.scoreboardTopBorderSegment.getHeight() - ConstProps.scoreboardBottomBorderSegment.getHeight())
+          / ConstProps.numberedTileHeightInPixels;
       // TODO even though it shouldn't be possible maybe just check and make sure the coordinates are
       // valid just in case
       Cell clickedCell = this.board.initialCell.getCell(tileX, tileY);
       if (buttonPressed.equals("LeftButton")) {
-        if (clickedCell.flagged) {
+        if (timeStart == false) {
+          timeStart = true;
+        }
+        if (clickedCell.revealed) {
+          return;
+        } else if (clickedCell.flagged) {
           return;
         } else if (clickedCell.hasMine == false) {
           clickedCell.revealed = true;
-          constProps.placeNumberedTileImage(worldScene, clickedCell.numOfMinesAdjacent(), tileX, tileY);
-          floodFill(clickedCell, tileX, tileY);
+          floodFill(clickedCell);
         } else if (clickedCell.hasMine) {
           clickedCell.revealed = true;
-          constProps.placeMineTileImage(worldScene, tileX, tileY);
           hitMine = true;
         } else {
           try {
@@ -423,15 +636,15 @@ class MineSweeperWorld extends World {
         if (!clickedCell.revealed) {
           if (clickedCell.flagged) {
             clickedCell.flagged = false;
-            constProps.placeUnknownTileImage(worldScene, tileX, tileY);
           } else {
             clickedCell.flagged = true;
-            constProps.placeFlagTileImage(worldScene, tileX, tileY);
+            numberFlagged++;
           }
         }
       }
     }
     
+    // TODO optimize the hell out of this
     public boolean gameWon(Cell cell, HashSet<Cell> visited) {
       boolean result = true;
       result = (result && (cell.revealed || cell.hasMine));
@@ -450,13 +663,14 @@ class MineSweeperWorld extends World {
     @Override
     public WorldEnd worldEnds() {
       if (hitMine) {
-        worldScene.placeImageXY(new TextImage("You Lost", 28, new Color(0, 0, 0)),
-            (widthInTiles * constProps.tileWidthInPixels) / 2, (heightInTiles * constProps.tileHeightInPixels) / 2);
+        timeStart = false;
+        worldScene.placeImageXY(createLostGameBoardImage(),
+            widthInPixels / 2, heightInPixels / 2);
         return new WorldEnd(true, worldScene);
       } 
       else if (gameWon(board.initialCell, new HashSet<Cell>())) {
         worldScene.placeImageXY(new TextImage("You Won", 28, new Color(0, 0, 0)),
-            (widthInTiles * constProps.tileWidthInPixels) / 2, (heightInTiles * constProps.tileHeightInPixels) / 2);
+            (widthInTiles * ConstProps.numberedTileWidthInPixels) / 2, (heightInTiles * ConstProps.numberedTileHeightInPixels) / 2);
         return new WorldEnd(true, worldScene);
       } else {
         return new WorldEnd(false, this.makeScene());
@@ -466,11 +680,20 @@ class MineSweeperWorld extends World {
 
 public class MineSweeper {
   static void runGame(int tileWidth, int tileHeight, int numMines) {
-    ConstProps constProps = new ConstProps();
-    MineSweeperWorld gameWorld = new MineSweeperWorld(tileWidth, tileHeight, numMines, constProps);
-    int pixelWidth = tileWidth * constProps.tileWidthInPixels;
-    int pixelHeight = tileHeight * constProps.tileHeightInPixels;
-    gameWorld.bigBang(pixelWidth, pixelHeight, 1);
+    if (tileWidth < 8) {
+      System.out.println("Cannot run a game with a tile width smaller than 8");
+      System.exit(1);
+    }
+    
+    int pixelWidth = (int)((tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegment.getWidth() + ConstProps.tileRightBorderSegment.getWidth());
+    int pixelHeight = (int) ((tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegment.getHeight() + ConstProps.scoreboardBottomBorderSegment.getHeight()
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegment.getHeight());
+    double tickRate = 0.5;
+    MineSweeperWorld gameWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, numMines, tickRate);
+    // TODO I can get rid of these casts if I just hard code the pixel amounts as ints since I already know them ahead of time
+    
+    gameWorld.bigBang(pixelWidth, pixelHeight, 0.1);
   }
 
   public static void main(String[] args) {
