@@ -257,6 +257,11 @@ final class ConstProps {
     final static FromFileImage scoreboardTopBorderSegment = new FromFileImage("ScoreboardTopBorderSegment.png");
     final static FromFileImage scoreboardLeftBorderSegment = new FromFileImage("ScoreboardLeftBorder.png");
     final static FromFileImage scoreboardRightBorderSegment = new FromFileImage("ScoreboardRightBorder.png");
+    final static int scoreboardLeftBorderSegmentWidth = 15;
+    final static int scoreboardRightBorderSegmentWidth = 15;
+    final static int scoreboardTopBorderSegmentHeight = 15;
+    final static int scoreboardTimerWidth = 60;
+    final static int scoreBoardTimerHeight = 34;
 
     final static FromFileImage scoreboardMineCounterZero = new FromFileImage("Scoreboard0.png");
     final static FromFileImage scoreboardMineCounterOne = new FromFileImage("Scoreboard1.png");
@@ -272,10 +277,12 @@ final class ConstProps {
     final static ArrayList<FromFileImage> mineCounterImages = new ArrayList<FromFileImage>(Arrays.asList(scoreboardMineCounterZero, scoreboardMineCounterOne, scoreboardMineCounterTwo, scoreboardMineCounterThree, scoreboardMineCounterFour, scoreboardMineCounterFive, scoreboardMineCounterSix, scoreboardMineCounterSeven, scoreboardMineCounterEight, scoreboardMineCounterNine));
 
     final static FromFileImage tileLeftBorderSegment = new FromFileImage("TileLeftBorderSegment.png");
+    final static int tileLeftBorderSegmentWidth = 15;
     final static FromFileImage tileRightBorderSegment = new FromFileImage("TileRightBorderSegment.png");
     final static FromFileImage tileBottomBorderLeftCorner = new FromFileImage("TileLeftBorderBottomCorner.png");
     final static FromFileImage tileBottomBorderRightCorner = new FromFileImage("TileRightBorderBottomCorner.png");
     final static FromFileImage tileBottomBorderSegment = new FromFileImage("TileBottomBorderSegment.png");
+    final static int scoreboardBottomBorderSegmentHeight = 15;
 
     final static FromFileImage smileUnpressed = new FromFileImage("SmileUnpressed.png");
     final static FromFileImage smilePressed = new FromFileImage("SmilePressed.png");
@@ -372,6 +379,7 @@ class MineSweeperWorld extends World {
     boolean mouseClicked;
     WorldScene worldScene;
     boolean hitMine;
+    
 
     MineSweeperWorld(int widthInTiles, int widthInPixels, int heightInTiles, int heightInPixels, int numMines, double tickRate) {
       this.widthInTiles = widthInTiles;
@@ -395,6 +403,9 @@ class MineSweeperWorld extends World {
       newScene.placeImageXY(
           new RectangleImage(widthInPixels, heightInPixels, OutlineMode.SOLID, new Color(255, 255, 255)),
           widthInPixels / 2, heightInPixels / 2);
+      newScene.placeImageXY(createGameBoardImage(),
+          widthInPixels / 2,
+          heightInPixels/ 2);
       return newScene;
     }
 
@@ -532,6 +543,7 @@ class MineSweeperWorld extends World {
         timer = timer + tickRate;
         if (timer / (1 / tickRate) >= 1) {
           displayedTime = displayedTime + 1;
+          worldScene.placeImageXY(createScoreboardTimer(), (int) (widthInPixels - ConstProps.scoreboardRightBorderSegmentWidth - 9 - (ConstProps.scoreboardTimerWidth / 2.0)), (int)((7 + ConstProps.scoreboardTopBorderSegmentHeight) + (ConstProps.scoreBoardTimerHeight / 2.0)));
           timer = 0.0;
         }
       }
@@ -539,15 +551,15 @@ class MineSweeperWorld extends World {
 
     @Override
     public WorldScene makeScene() {
-      worldScene.placeImageXY(createGameBoardImage(),
-          widthInPixels / 2,
-          heightInPixels/ 2);
+      //worldScene.placeImageXY(createGameBoardImage(),
+        //  widthInPixels / 2,
+        //  heightInPixels/ 2);
       return worldScene;
     }
     
     // TODO does this only happen if the clicked tile has zero mines around it?
     // or does it happen for every tile?
-    public void floodFill(Cell cell) {
+    public void floodFill(Cell cell, int tileX, int tileY) {
       Cell topCell = cell.getTopMiddleNeighbor();
       Cell bottomCell = cell.getBottomMiddleNeighbor();
       Cell leftCell = cell.getMiddleLeftNeighbor();
@@ -555,40 +567,67 @@ class MineSweeperWorld extends World {
       if (topCell != null) {
         if (topCell.hasMine == false && !topCell.revealed) {
           topCell.revealed = true;
+          worldScene.placeImageXY(ConstProps.determineImageFromCell(topCell),
+              (int) (ConstProps.tileLeftBorderSegmentWidth + (tileX * ConstProps.numberedTileWidthInPixels)
+                  + (ConstProps.numberedTileWidthInPixels / 2.0)),
+              (int) (ConstProps.scoreboardTopBorderSegmentHeight + ConstProps.heightScoreboardBackground
+                  + ConstProps.scoreboardBottomBorderSegmentHeight
+                  + ((tileY - 1) * ConstProps.numberedTileHeightInPixels)
+                  + (ConstProps.numberedTileHeightInPixels / 2.0)));
           if (topCell.numOfMinesAdjacent == 0) {
-            floodFill(topCell);
+            floodFill(topCell, tileX, tileY - 1);
           }
         }
       }
       if (bottomCell != null) {
         if (bottomCell.hasMine == false && !bottomCell.revealed) {
           bottomCell.revealed = true;
+          worldScene.placeImageXY(ConstProps.determineImageFromCell(bottomCell),
+              (int) (ConstProps.tileLeftBorderSegmentWidth + (tileX * ConstProps.numberedTileWidthInPixels)
+                  + (ConstProps.numberedTileWidthInPixels / 2.0)),
+              (int) (ConstProps.scoreboardTopBorderSegmentHeight + ConstProps.heightScoreboardBackground
+                  + ConstProps.scoreboardBottomBorderSegmentHeight
+                  + ((tileY + 1) * ConstProps.numberedTileHeightInPixels)
+                  + (ConstProps.numberedTileHeightInPixels / 2.0)));
           if (bottomCell.numOfMinesAdjacent == 0) {
-            floodFill(bottomCell);
+            floodFill(bottomCell, tileX, tileY + 1);
           }
         }
       }
       if (leftCell != null) {
         if (leftCell.hasMine == false && !leftCell.revealed) {
           leftCell.revealed = true;
+          worldScene.placeImageXY(ConstProps.determineImageFromCell(leftCell),
+              (int) (ConstProps.tileLeftBorderSegmentWidth + ((tileX - 1) * ConstProps.numberedTileWidthInPixels)
+                  + (ConstProps.numberedTileWidthInPixels / 2.0)),
+              (int) (ConstProps.scoreboardTopBorderSegmentHeight + ConstProps.heightScoreboardBackground
+                  + ConstProps.scoreboardBottomBorderSegmentHeight + (tileY * ConstProps.numberedTileHeightInPixels)
+                  + (ConstProps.numberedTileHeightInPixels / 2.0)));
           if (leftCell.numOfMinesAdjacent == 0) {
-            floodFill(leftCell);
+            floodFill(leftCell, tileX - 1, tileY);
           }
         }
       }
       if (rightCell != null) {
         if (rightCell.hasMine == false && !rightCell.revealed) {
           rightCell.revealed = true;
+          worldScene.placeImageXY(ConstProps.determineImageFromCell(rightCell),
+              (int) (ConstProps.tileLeftBorderSegmentWidth + ((tileX + 1) * ConstProps.numberedTileWidthInPixels)
+                  + (ConstProps.numberedTileWidthInPixels / 2.0)),
+              (int) (ConstProps.scoreboardTopBorderSegmentHeight + ConstProps.heightScoreboardBackground
+                  + ConstProps.scoreboardBottomBorderSegmentHeight + (tileY * ConstProps.numberedTileHeightInPixels)
+                  + (ConstProps.numberedTileHeightInPixels / 2.0)));
           if (rightCell.numOfMinesAdjacent == 0) {
-            floodFill(rightCell);
+            floodFill(rightCell, tileX + 1, tileY);
           }
         }
       }
     }
-
+    
     @Override
     public void onMousePressed(Posn pos, String buttonPressed) {
       if (buttonPressed.equals("LeftButton")) {
+        worldScene.placeImageXY(ConstProps.smileClick, (int)(ConstProps.tileLeftBorderSegmentWidth + ((widthInTiles * ConstProps.numberedTileWidthInPixels) / 2.0)), (int)(ConstProps.scoreboardTopBorderSegmentHeight + (ConstProps.heightScoreboardBackground / 2.0)));
         mouseClicked = true;
       }
     }
@@ -596,6 +635,7 @@ class MineSweeperWorld extends World {
     @Override
     public void onMouseReleased(Posn pos, String buttonPressed) {
       if (buttonPressed.equals("LeftButton")) {
+        worldScene.placeImageXY(ConstProps.smileUnpressed, (int)(ConstProps.tileLeftBorderSegmentWidth + ((widthInTiles * ConstProps.numberedTileWidthInPixels) / 2.0)), (int)(ConstProps.scoreboardTopBorderSegmentHeight + (ConstProps.heightScoreboardBackground / 2.0)));
         mouseClicked = false;
       }
     }
@@ -619,7 +659,8 @@ class MineSweeperWorld extends World {
           return;
         } else if (clickedCell.hasMine == false) {
           clickedCell.revealed = true;
-          floodFill(clickedCell);
+          worldScene.placeImageXY(ConstProps.determineImageFromCell(clickedCell), (int)(ConstProps.tileLeftBorderSegmentWidth + (tileX * ConstProps.numberedTileWidthInPixels) + (ConstProps.numberedTileWidthInPixels / 2.0)), (int)(ConstProps.scoreboardTopBorderSegmentHeight + ConstProps.heightScoreboardBackground + ConstProps.scoreboardBottomBorderSegmentHeight + (tileY * ConstProps.numberedTileHeightInPixels) + (ConstProps.numberedTileHeightInPixels / 2.0)));
+          floodFill(clickedCell, tileX, tileY);
         } else if (clickedCell.hasMine) {
           clickedCell.revealed = true;
           hitMine = true;
@@ -636,9 +677,14 @@ class MineSweeperWorld extends World {
         if (!clickedCell.revealed) {
           if (clickedCell.flagged) {
             clickedCell.flagged = false;
+            numberFlagged--;
+            worldScene.placeImageXY(ConstProps.determineImageFromCell(clickedCell), (int)(ConstProps.tileLeftBorderSegmentWidth + (tileX * ConstProps.numberedTileWidthInPixels) + (ConstProps.numberedTileWidthInPixels / 2.0)), (int)(ConstProps.scoreboardTopBorderSegmentHeight + ConstProps.heightScoreboardBackground + ConstProps.scoreboardBottomBorderSegmentHeight + (tileY * ConstProps.numberedTileHeightInPixels) + (ConstProps.numberedTileHeightInPixels / 2.0)));
+            worldScene.placeImageXY(createScoreboardMineCounter(), (int) ((9 + ConstProps.scoreboardLeftBorderSegmentWidth) + (ConstProps.scoreboardTimerWidth / 2.0)), (int)((7 + ConstProps.scoreboardTopBorderSegmentHeight) + (ConstProps.scoreBoardTimerHeight / 2.0)));
           } else {
             clickedCell.flagged = true;
             numberFlagged++;
+            worldScene.placeImageXY(ConstProps.determineImageFromCell(clickedCell), (int)(ConstProps.tileLeftBorderSegmentWidth + (tileX * ConstProps.numberedTileWidthInPixels) + (ConstProps.numberedTileWidthInPixels / 2.0)), (int)(ConstProps.scoreboardTopBorderSegmentHeight + ConstProps.heightScoreboardBackground + ConstProps.scoreboardBottomBorderSegmentHeight + (tileY * ConstProps.numberedTileHeightInPixels) + (ConstProps.numberedTileHeightInPixels / 2.0)));
+            worldScene.placeImageXY(createScoreboardMineCounter(), (int) ((9 + ConstProps.scoreboardLeftBorderSegmentWidth) + (ConstProps.scoreboardTimerWidth / 2.0)), (int)((7 + ConstProps.scoreboardTopBorderSegmentHeight) + (ConstProps.scoreBoardTimerHeight / 2.0)));
           }
         }
       }
