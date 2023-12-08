@@ -8,18 +8,79 @@ import javalib.impworld.*;
 import javalib.worldimages.*;
 import tester.Tester;
 
+
 // The data structure behind each individual tile on the gameboard
 class Cell {
-  // neighboring cells are indexed depending on location around this cell, labeled
-  // X here
+  /* Template
+     *
+     * Fields:
+     * this.neighbors -- ArrayList<Cell>
+     * this.numMinesAdjacent -- int
+     * this.hasMine -- boolean
+     * this.revealed -- boolean
+     * this.flagged -- boolean
+     * 
+     * Methods:
+     * this.getTopMiddleNeighbor() -- Cell
+     * this.setTopMiddleNeighbor(Cell cell) -- void
+     * this.getBottomMiddleNeighbor() -- Cell
+     * this.setBottomMiddleNeighbor(Cell cell) -- void
+     * this.getMiddleLeftNeighbor() -- Cell
+     * this.setMiddleLeftNeighbor(Cell cell) -- void
+     * this.getTopLeftNeighbor() -- Cell
+     * this.setTopLeftNeighbor(Cell cell) -- void
+     * this.getTopRightNeighbor() -- Cell
+     * this.setTopRightNeighbor(Cell cell) -- void
+     * this.getBottomLeftNeighbor() -- Cell
+     * this.setBottomLeftNeighbor(Cell cell) -- void
+     * this.getBottomRightNeighbor() -- Cell
+     * this.setBottomRightNeighbor(Cell cell) -- void
+     * this.getCell(int x, int y) -- Cell
+     * this.numOfMinesAdjacent() -- int
+     * 
+     * Methods on fields:
+     * this.neighbors.add(int index, Cell element) -- void
+     * this.neighbors.add(Cell element) -- boolean
+     * this.neighbors.addAll(int index, Collection<> c) -- boolean
+     * this.neighbors.addAll(Collection<> c) -- boolean
+     * this.neighbors.addFirst(Cell element) -- void
+     * this.neighbors.addLast(Cell element) -- void
+     * this.neighbors.clear() -- void
+     * this.neighbors.clone() -- Object
+     * this.neighbors.contains(Object o) -- boolean
+     * this.neighbors.ensureCapacity(int minCapacity) -- void
+     * this.neighbors.equals(Object o) -- boolean
+     * this.neighbors.forEach(Consumer<> action) -- void
+     * this.neighbors.get(int index) -- Cell
+     * this.neighbors.getFirst() -- Cell
+     * this.neighbors.getLast() -- Cell
+     * this.neighbors.hashCode() -- int
+     * this.neighbors.indexOf(Object o) -- int
+     * this.neighbors.isEmpty() -- boolean
+     * this.neighbors.iterator() -- Iterator<Cell>
+     * this.neighbors.lastIndexOf(Object o) -- int
+     * this.neighbors.listIterator() -- ListIterator<Cell>
+     * this.neighbors.listIterator(int index) -- ListIterator<Cell>
+     * this.neighbors.remove(int index) -- Cell
+     * this.neighbors.remove(Object o) -- boolean
+     * this.neighbors.removeAll(Collection<> c) -- boolean
+     * this.neighbors.removeFirst() -- Cell
+     * this.neighbors.removeIf(Predicate<> filter) -- boolean
+     * this.neighbors.removeLast() -- Cell
+     * this.neighbors.removeRange(int fromIndex, int toIndex) -- List<Cell>
+     * this.neighbors.toArray() -- Object[]
+     * this.neighbors.toArray(T[] a) -- <T> T[]
+     * this.neighbors.trimToSize() -- void
+     * 
+     */
+
+  // Neighboring cells are indexed depending on location around this cell, labeled X here
   // 0 1 2
   // 3 X 4
   // 5 6 7
-  // This is an implementation detail that doesn't need to be remembered by its
-  // users
+  // This is an implementation detail that doesn't need to be remembered by its users
   // Users just use the designated setters and getters, or the neighbors iterator
-  // when
-  // the location around the cell is irrelevant
+  // when the location around the cell is irrelevant
   ArrayList<Cell> neighbors;
 
   // Used to display number of adjacent mines during gameplay
@@ -31,8 +92,7 @@ class Cell {
   // Holds whether the cell has been revealed by the player or not
   boolean revealed;
 
-  // Holds whether the player as flagged this cell as a potential location of a
-  // mine
+  // Holds whether the player as flagged this cell as a potential location of a mine
   boolean flagged;
 
   Cell() {
@@ -167,34 +227,67 @@ class Cell {
 // Acts as a sentinel of sorts for the first cell in the game board
 // Also contains all the methods for initializing the graph of cells
 class Board {
-  final int WIDTH;
-  final int HEIGHT;
+  /* Template
+     *
+     * Fields:
+     * this.widthInTiles -- int
+     * this.heightInTiles -- int
+     * this.initialCell -- Cell
+     * 
+     * Methods:
+     * this.stitchRows(Cell topRow, Cell bottomRow)  -- void
+     * this.initializeBoard(Cell cell) -- void
+     * <T> this.swap(ArrayList<T> list, final int indexA, final int indexB) -- void
+     * this.fisherYatesShuffle(ArrayList<Integer> list, final int numItems) -- void
+     * this.initializeMines(final int numMines) -- void
+     * 
+     * Methods on fields:
+     * this.initialCell.getTopMiddleNeighbor() -- Cell
+     * this.initialCell.setTopMiddleNeighbor(Cell cell) -- void
+     * this.initialCell.getBottomMiddleNeighbor() -- Cell
+     * this.initialCell.setBottomMiddleNeighbor(Cell cell) -- void
+     * this.initialCell.getMiddleLeftNeighbor() -- Cell
+     * this.initialCell.setMiddleLeftNeighbor(Cell cell) -- void
+     * this.initialCell.getTopLeftNeighbor() -- Cell
+     * this.initialCell.setTopLeftNeighbor(Cell cell) -- void
+     * this.initialCell.getTopRightNeighbor() -- Cell
+     * this.initialCell.setTopRightNeighbor(Cell cell) -- void
+     * this.initialCell.getBottomLeftNeighbor() -- Cell
+     * this.initialCell.setBottomLeftNeighbor(Cell cell) -- void
+     * this.initialCell.getBottomRightNeighbor() -- Cell
+     * this.initialCell.setBottomRightNeighbor(Cell cell) -- void
+     * this.initialCell.getCell(int x, int y) -- Cell
+     * this.initialCell.numOfMinesAdjacent() -- int
+     * 
+     */
+
+  final int widthInTiles;
+  final int heightInTiles;
   Cell initialCell;
 
   Board(int width, int height, int numMines) {
-    this.WIDTH = width;
-    this.HEIGHT = height;
+    this.widthInTiles = width;
+    this.heightInTiles = height;
     this.initialCell = new Cell();
     initializeBoard(initialCell);
     initializeMines(numMines);
   }
 
   // EFFECT: Mutates every cell in both topRow and bottomRow so that their
-  // neighbors arraylist
-  // is initialized with their correct values
+  // neighbors arraylist is initialized with their correct values
   // Takes two rows of cells and connects them, functionally combining the graphs
   // together
-  private void stitchRows(Cell topRow, Cell bottomRow) {
+  void stitchRows(Cell topRow, Cell bottomRow) {
     Cell currentTopCell = topRow;
     Cell currentBottomCell = bottomRow;
-    for (int i = 0; i < WIDTH; i++) {
+    for (int i = 0; i < widthInTiles; i++) {
       currentTopCell.setBottomMiddleNeighbor(currentBottomCell);
       currentBottomCell.setTopMiddleNeighbor(currentTopCell);
 
       if (i == 0) {
         currentTopCell.setBottomRightNeighbor(currentBottomCell.getMiddleRightNeighbor());
         currentBottomCell.setTopRightNeighbor(currentTopCell.getMiddleRightNeighbor());
-      } else if (i == WIDTH - 1) {
+      } else if (i == widthInTiles - 1) {
         currentTopCell.setBottomLeftNeighbor(currentBottomCell.getMiddleLeftNeighbor());
         currentBottomCell.setTopLeftNeighbor(currentTopCell.getMiddleLeftNeighbor());
       } else {
@@ -210,10 +303,9 @@ class Board {
   }
 
   // EFFECT: Mutates cell so that the gameboard graph of cells is properly
-  // initialized
-  // with cell being in the proverbial (0,0) position
+  // initialized with cell being in the proverbial (0,0) position
   // Initializes the gameboard of cells
-  private void initializeBoard(Cell cell) {
+  void initializeBoard(Cell cell) {
     Cell topRow;
     Cell bottomRow;
 
@@ -223,7 +315,7 @@ class Board {
     Cell previousCell = firstCell;
     // Starting at one since previousCell is already taking the 0th indexed position
     // in the row
-    for (int j = 1; j < WIDTH; j++) {
+    for (int j = 1; j < widthInTiles; j++) {
       Cell newCell = new Cell();
       newCell.setMiddleLeftNeighbor(previousCell);
       previousCell.setMiddleRightNeighbor(newCell);
@@ -232,12 +324,12 @@ class Board {
     topRow = firstCell;
 
     // Starting at one since the first row was already computed above
-    for (int i = 1; i < HEIGHT; i++) {
+    for (int i = 1; i < heightInTiles; i++) {
       firstCell = new Cell();
       previousCell = firstCell;
       // Starting at one since previousCell is already taking the 0th indexed position
       // in the row
-      for (int j = 1; j < WIDTH; j++) {
+      for (int j = 1; j < widthInTiles; j++) {
         Cell newCell = new Cell();
         newCell.setMiddleLeftNeighbor(previousCell);
         previousCell.setMiddleRightNeighbor(newCell);
@@ -252,16 +344,15 @@ class Board {
   // EFFECT: Mutates the arraylist so that the element at indexA is now at indexB,
   // and that the element at indexB is now at indexA
   // Swaps the given elements positions in the list
-  private <T> void swap(ArrayList<T> list, final int indexA, final int indexB) {
+  <T> void swap(ArrayList<T> list, final int indexA, final int indexB) {
     T temp = list.get(indexA);
     list.set(indexA, list.get(indexB));
     list.set(indexB, temp);
   }
 
-  // EFFECT: Mutates the list so that the positions of the elements within it are
-  // changed
+  // EFFECT: Mutates the list so that the positions of the elements within it are changed
   // Shuffles the given list
-  private void fisherYatesShuffle(ArrayList<Integer> list, final int numItems) {
+  void fisherYatesShuffle(ArrayList<Integer> list, final int numItems) {
     Random rand = new Random();
     for (int i = 0; i <= numItems - 2; i++) {
       int j = i + rand.nextInt(numItems - i);
@@ -271,24 +362,23 @@ class Board {
 
   // Initializes the mines in a consistent O(N)
   // Confirmed with profiler (VisualVM)
-  // EFFECT: mutates numMines random cells within the graph of cells so that
-  // hasMine is set to true
+  // EFFECT: mutates numMines random cells within the graph of cells so that hasMine is set to true
   // Randomly places mines throughout the gameboard
-  private void initializeMines(final int numMines) {
-    int size = WIDTH * HEIGHT;
+  void initializeMines(final int numMines) {
+    int size = widthInTiles * heightInTiles;
     ArrayList<Integer> boardAsInts = new ArrayList<Integer>(size);
     for (int i = 0; i < size; i++) {
       boardAsInts.add(i);
     }
     fisherYatesShuffle(boardAsInts, size);
     for (int i = 0; i < numMines; i++) {
-      int y = boardAsInts.get(i) / WIDTH;
-      int x = boardAsInts.get(i) % WIDTH;
+      int y = boardAsInts.get(i) / widthInTiles;
+      int x = boardAsInts.get(i) % widthInTiles;
       initialCell.getCell(x, y).hasMine = true;
     }
 
-    for (int i = 0; i < HEIGHT; i++) {
-      for (int j = 0; j < WIDTH; j++) {
+    for (int i = 0; i < heightInTiles; i++) {
+      for (int j = 0; j < widthInTiles; j++) {
         Cell currentCell = initialCell.getCell(j, i);
         currentCell.numOfMinesAdjacent = currentCell.numOfMinesAdjacent();
       }
@@ -298,6 +388,135 @@ class Board {
 
 // Holds different resources used through the program
 final class ConstProps {
+  /* Template
+     *
+     * Fields:
+     * this.scoreboardLeftBorderSegmentWidth -- int
+     * this.scoreboardRightBorderSegmentWidth -- int
+     * this.scoreboardTopBorderSegmentHeight -- Cell
+     * this.numberedTileWidthInPixels -- int
+     * this.numberedTileHeightInPixels -- int
+     * this.tileLeftBorderSegmentWidth -- int
+     * this.tileRightBorderSegmentWidth -- int
+     * this.heightScoreboardBackground -- int
+     * this.tileBottomBorderSegmentHeight -- int
+     * this.scoreboardBottomBorderSegmentHeight -- int
+     * this.mineCounterWidth -- int
+     * this.mineCounterHeight -- int
+     * this.scoreboardTimerWidth -- int
+     * this.scoreBoardTimerHeight -- int
+     * this.scoreboardBackgroundColor -- Color
+     * this.scoreboardBottomBorderSegment -- FromFileImage
+     * this.scoreboardTopBorderSegment -- FromFileImage
+     * this.scoreboardLeftBorderSegment -- FromFileImage
+     * this.scoreboardRightBorderSegment -- FromFileImage
+     * this.scoreboardCounterZero -- FromFileImage
+     * this.scoreboardCounterOne -- FromFileImage
+     * this.scoreboardCounterTwo -- FromFileImage
+     * this.scoreboardCounterThree -- FromFileImage
+     * this.scoreboardCounterFour -- FromFileImage
+     * this.scoreboardCounterFive -- FromFileImage
+     * this.scoreboardCounterSix -- FromFileImage
+     * this.scoreboardCounterSeven -- FromFileImage
+     * this.scoreboardCounterEight -- FromFileImage
+     * this.scoreboardCounterNine -- FromFileImage
+     * this.tileLeftBorderSegment -- FromFileImage
+     * this.tileRightBorderSegment -- FromFileImage
+     * this.tileBottomBorderLeftCorner -- FromFileImage
+     * this.tileBottomBorderRightCorner -- FromFileImage
+     * this.tileBottomBorderSegment -- FromFileImage
+     * this.smileUnpressed -- FromFileImage
+     * this.smilePressed -- FromFileImage
+     * this.smileClick -- FromFileImage
+     * this.smileLost -- FromFileImage
+     * this.smileWon -- FromFileImage
+     * this.zeroAdjMines -- FromFileImage
+     * this.oneAdjMines -- FromFileImage
+     * this.twoAdjMines -- FromFileImage
+     * this.threeAdjMines -- FromFileImage
+     * this.fourAdjMines -- FromFileImage
+     * this.fiveAdjMines -- FromFileImage
+     * this.sixAdjMines -- FromFileImage
+     * this.sevenAdjMines -- FromFileImage
+     * this.eightAdjMines -- FromFileImage
+     * this.unknownAdjMines -- FromFileImage
+     * this.flag -- FromFileImage
+     * this.unflaggedMine -- FromFileImage
+     * this.flaggedMine -- FromFileImage
+     * this.detonatedMine -- FromFileImage
+     * 
+     * Methods:
+     * this.determineImageFromCell(Cell cell) -- WorldImage
+     * this.gameLostDetermineImageFromCell(Cell cell) -- WorldImage
+     * 
+     * Methods:
+     * this.counterImages.add(int index, Cell element) -- void
+     * this.counterImages.add(Cell element) -- boolean
+     * this.counterImages.addAll(int index, Collection<> c) -- boolean
+     * this.counterImages.addAll(Collection<> c) -- boolean
+     * this.counterImages.addFirst(Cell element) -- void
+     * this.counterImages.addLast(Cell element) -- void
+     * this.counterImages.clear() -- void
+     * this.counterImages.clone() -- Object
+     * this.counterImages.contains(Object o) -- boolean
+     * this.counterImages.ensureCapacity(int minCapacity) -- void
+     * this.counterImages.equals(Object o) -- boolean
+     * this.counterImages.forEach(Consumer<> action) -- void
+     * this.counterImages.get(int index) -- Cell
+     * this.counterImages.getFirst() -- Cell
+     * this.counterImages.getLast() -- Cell
+     * this.counterImages.hashCode() -- int
+     * this.counterImages.indexOf(Object o) -- int
+     * this.counterImages.isEmpty() -- boolean
+     * this.counterImages.iterator() -- Iterator<Cell>
+     * this.counterImages.lastIndexOf(Object o) -- int
+     * this.counterImages.listIterator() -- ListIterator<Cell>
+     * this.counterImages.listIterator(int index) -- ListIterator<Cell>
+     * this.counterImages.remove(int index) -- Cell
+     * this.counterImages.remove(Object o) -- boolean
+     * this.counterImages.removeAll(Collection<> c) -- boolean
+     * this.counterImages.removeFirst() -- Cell
+     * this.counterImages.removeIf(Predicate<> filter) -- boolean
+     * this.counterImages.removeLast() -- Cell
+     * this.counterImages.removeRange(int fromIndex, int toIndex) -- List<Cell>
+     * this.counterImages.toArray() -- Object[]
+     * this.counterImages.toArray(T[] a) -- <T> T[]
+     * this.counterImages.trimToSize() -- vcounterImages
+     * 
+     * this.numberedTileImages.add(int index, Cell element) -- void
+     * this.numberedTileImages.add(Cell element) -- boolean
+     * this.numberedTileImages.addAll(int index, Collection<> c) -- boolean
+     * this.numberedTileImages.addAll(Collection<> c) -- boolean
+     * this.numberedTileImages.addFirst(Cell element) -- void
+     * this.numberedTileImages.addLast(Cell element) -- void
+     * this.numberedTileImages.clear() -- void
+     * this.numberedTileImages.clone() -- Object
+     * this.numberedTileImages.contains(Object o) -- boolean
+     * this.numberedTileImages.ensureCapacity(int minCapacity) -- void
+     * this.numberedTileImages.equals(Object o) -- boolean
+     * this.numberedTileImages.forEach(Consumer<> action) -- void
+     * this.numberedTileImages.get(int index) -- Cell
+     * this.numberedTileImages.getFirst() -- Cell
+     * this.numberedTileImages.getLast() -- Cell
+     * this.numberedTileImages.hashCode() -- int
+     * this.numberedTileImages.indexOf(Object o) -- int
+     * this.numberedTileImages.isEmpty() -- boolean
+     * this.numberedTileImages.iterator() -- Iterator<Cell>
+     * this.numberedTileImages.lastIndexOf(Object o) -- int
+     * this.numberedTileImages.listIterator() -- ListIterator<Cell>
+     * this.numberedTileImages.listIterator(int index) -- ListIterator<Cell>
+     * this.numberedTileImages.remove(int index) -- Cell
+     * this.numberedTileImages.remove(Object o) -- boolean
+     * this.numberedTileImages.removeAll(Collection<> c) -- boolean
+     * this.numberedTileImages.removeFirst() -- Cell
+     * this.numberedTileImages.removeIf(Predicate<> filter) -- boolean
+     * this.numberedTileImages.removeLast() -- Cell
+     * this.numberedTileImages.removeRange(int fromIndex, int toIndex) -- List<Cell>
+     * this.numberedTileImages.toArray() -- Object[]
+     * this.numberedTileImages.toArray(T[] a) -- <T> T[]
+     * this.numberedTileImages.trimToSize() -- void
+     */
+
   // As determined via the profiler used (VisualVM), calling getWidth() and
   // getHeight()
   // on images was actually suprisingly expensive as an aggregate
@@ -396,8 +615,7 @@ final class ConstProps {
   // The image used to display the mine the player hit when they lost the game
   final static FromFileImage detonatedMine = new FromFileImage("Detonated.png");
 
-  // Returns the appropriate image to display based upon the properties of the
-  // given cell
+  // Returns the appropriate image to display based upon the properties of the given cell
   static WorldImage determineImageFromCell(Cell cell) {
     if (cell.revealed) {
       if (cell.hasMine == false) {
@@ -414,9 +632,8 @@ final class ConstProps {
     }
   }
 
-  // Returns the appropriate image to display based upon the properties of the
-  // given cell
-  // specifically when displaying the final screen once the game has been lost
+  // Returns the appropriate image to display based upon the properties of the given cell
+  // Specifically when displaying the final screen once the game has been lost
   static WorldImage gameLostDetermineImageFromCell(Cell cell) {
     if (cell.hasMine) {
       if (cell.revealed == false) {
@@ -440,6 +657,7 @@ final class ConstProps {
   }
 }
 
+// TODO Maybe remove this?
 class MouseClickException extends Exception {
   public MouseClickException() {
     super();
@@ -452,9 +670,56 @@ class MouseClickException extends Exception {
 
 // The data structure holding all the state for the game
 class MineSweeperWorld extends World {
+  /* Template
+     *
+     * Fields:
+     * this.board -- Board
+     * this.widthInTiles -- int
+     * this.widthInPixels -- int
+     * this.heightInTiles -- int
+     * this.heightInPixels -- int
+     * this.numMines -- int
+     * this.tickRate -- double
+     * this.timer -- double
+     * this.displayedTime -- int
+     * this.timeStart -- boolean
+     * this.numberFlagged -- boolean
+     * this.mouseClicked -- boolean
+     * this.worldScene -- WorldScene
+     * this.hitMine -- boolean
+     * this.pow -- int
+     * 
+     * Methods:
+     * this.makeScene() -- WorldScene
+     * this.initializeWorldScene() -- WorldScene
+     * this.createScoreboardTopBorder() -- BesideImage
+     * this.createScoreboardBottomBorder() -- BesideImage
+     * this.getNthDigit() -- int
+     * this.createScoreboardMineCounter() -- BesideImage
+     * this.createScoreboardTimer() -- BesideImage
+     * this.createScoreboard() -- BesideImage
+     * this.createLostScoreboard() -- BesideImage
+     * this.createTileRows() -- AboveImage
+     * this.createLostTileRows() -- AboveImage
+     * this.createBottomBorder() -- BesideImage
+     * this.createGameBoardImage() -- AboveImage
+     * this.createLostGameBoardImage() -- AboveImage
+     * this.onTick() -- void
+     * this.floodFill(Cell cell, int tileX, int tileY) -- void
+     * this.onMousePressed(Posn pos, String buttonPressed) -- void
+     * this.onMouseReleased(Posn pos, String buttonPressed) -- void
+     * this.onMouseClicked(Posn pos, String buttonPressed) -- void
+     * this.gameWon(Cell cell, HashSet<Cell> visited) -- boolean
+     * this.gameLost() -- boolean
+     * this.worldEnds() -- WorldEnd
+     * 
+     * Methods on fields:
+     * 
+     */
+
   // The graph of cells that make up the game board
   Board board;
-  
+
   // The number of tiles wide the gameboard is
   int widthInTiles;
 
@@ -469,7 +734,7 @@ class MineSweeperWorld extends World {
 
   // The number of mines in this current game of minesweeper
   int numMines;
-  
+
   // The tickrate of the currently running game
   double tickRate;
 
@@ -485,7 +750,7 @@ class MineSweeperWorld extends World {
 
   // Holds the number of flags placed by the player
   int numberFlagged;
-  
+
   // Holds whether the player holding down the left mouse button or not
   boolean mouseClicked;
 
@@ -513,25 +778,17 @@ class MineSweeperWorld extends World {
     this.worldScene = initializeWorldScene();
   }
 
-  // Originally the images drawn to the screen were created in here and everything
-  // was drawn
-  // every tick using loops where the (x,y) position of any given cell was never
-  // directly dealt with
+  // Originally the images drawn to the screen were created in here and everything was drawn
+  // every tick using loops where the (x,y) position of any given cell was never directly dealt with
   // This was incredibly slow.
-  // For reference, the timer on screen took on average 2.637 times longer to tick
-  // up
-  // compared to the implementation currently being used (10 trials, Std =
-  // 0.225588)
+  // For reference, the timer on screen took on average 2.637 times longer to tick up
+  // compared to the implementation currently being used (10 trials, Std = 0.225588)
   // Additionally, according to the profiler I used (VisualVM) >99% of cpu time
-  // was spent
-  // creating the images to draw to the screen
+  // was spent creating the images to draw to the screen
   // Currently, the WorldScene is initialized and ended using the original method
-  // (since it only
-  // needs to be done once), and every change after the initial screen is using
-  // the new method
-  // where the WorldScene is updated via mutation changing only what is actually
-  // changing
-  // rather than drawing every image on the screen over and over again
+  // (since it only needs to be done once), and every change after the initial screen is using
+  // the new method where the WorldScene is updated via mutation changing only what is actually
+  // changing rather than drawing every image on the screen over and over again
   @Override
   public WorldScene makeScene() {
     return worldScene;
@@ -705,6 +962,7 @@ class MineSweeperWorld extends World {
   AboveImage createGameBoardImage() {
     return new AboveImage(createTileRows(), createBottomBorder());
   }
+
   // Creates the entirety of the gameboard shown when the game is lost, border and all
   AboveImage createLostGameBoardImage() {
     return new AboveImage(createLostTileRows(), createBottomBorder());
@@ -730,6 +988,18 @@ class MineSweeperWorld extends World {
     }
   }
 
+  // Reveals all the tiles without adjacent mines and a outer ring of cells that do
+  // whenever the player clicks a cell
+  // EFFECT: Mutates topCell.revealed to true if topCell does not have a mine and has not been revealed yet
+  // EFFECT: Mutates bottomCell.revealed to true if bottomCell does not have a mine and has not been revealed yet
+  // EFFECT: Mutates leftCell.revealed to true if leftCell does not have a mine and has not been revealed yet
+  // EFFECT: Mutates rightCell.revealed to true if rightCell does not have a mine and has not been revealed yet
+  // EFFECT: Mutates topCell.flagged to false topCell was flagged, does not have a mine, and has not been revealed yet
+  // EFFECT: Mutates bottomCell.flagged to false bottomCell was flagged, does not have a mine, and has not been revealed yet
+  // EFFECT: Mutates leftCell.flagged to false leftCell was flagged, does not have a mine, and has not been revealed yet
+  // EFFECT: Mutates rightCell.flagged to false rightCell was flagged, does not have a mine, and has not been revealed yet
+  // EFFECT: Mutates numberFlagged to numberFlagged - 1 if any of the following list were flagged, did not have a mine, and had not been revealed: topCell, bottomCell, leftCell, rightCell
+  // EFFECT: Mutates worldScene to have the appropriate image displayed depending on whether topCell, bottomCell, leftCell, rightCell, or numberFlagged was mutated
   public void floodFill(Cell cell, int tileX, int tileY) {
     Cell topCell = cell.getTopMiddleNeighbor();
     Cell bottomCell = cell.getBottomMiddleNeighbor();
@@ -823,6 +1093,8 @@ class MineSweeperWorld extends World {
     }
   }
 
+  // Displays the worried smile face when the player is left clicking
+  // EFFECT: Mutates worldScene so that smileClick is being displayed in the game
   @Override
   public void onMousePressed(Posn pos, String buttonPressed) {
     if (buttonPressed.equals("LeftButton")) {
@@ -833,6 +1105,8 @@ class MineSweeperWorld extends World {
     }
   }
 
+  // Displays the regular smile face when the player is not left clicking
+  // EFFECT: Mutates worldScene so that smileUnpressed is displayed in the game
   @Override
   public void onMouseReleased(Posn pos, String buttonPressed) {
     if (buttonPressed.equals("LeftButton")) {
@@ -843,15 +1117,22 @@ class MineSweeperWorld extends World {
     }
   }
 
+  // Displays the cell clicked on by the player
+  // EFFECT: Mutates timeStart to true if it is false
+  // EFFECT: Mutates clickedCell.revealed to true if buttonPressed equals "LeftButton"
+  // EFFECT: Mutates worldScene to display the appropriate tile depending on clickedCell's properties if buttonPressed equals "LeftButton"
+  // EFFECT: Mutates other cells within the graph of cells making up the gameboard depending on the results of floodfill() if buttonPressed equals "LeftButton"
+  // EFFECT: Mutates hitMine to true if clickCell.hasMine is true and buttonPressed equals "LeftButton"
+  // EFFECT: Mutates clickedCell.flagged to true if clickedCell.flagged is false and buttonPressed equals "RightButton"
+  // EFFECT: Mutates clickedCell.flagged to false if clickedCell.flagged is true and buttonPressed equals "RightButton"
+  // EFFECT: Mutates numberFlagged to numberFlagged - 1 if clickedCell.flagged is true and buttonPressed equals "RightButton"
+  // EFFECT: Mutates numberFlagged to numberFlagged + 1 if clickedCell.flagged is false and buttonPressed equals "RightButton"
   @Override
   public void onMouseClicked(Posn pos, String buttonPressed) {
     int tileX = (pos.x - ConstProps.tileLeftBorderSegmentWidth) / ConstProps.numberedTileWidthInPixels;
     int tileY = (pos.y - ConstProps.heightScoreboardBackground
         - ConstProps.scoreboardTopBorderSegmentHeight - ConstProps.scoreboardBottomBorderSegmentHeight)
         / ConstProps.numberedTileHeightInPixels;
-    // TODO even though it shouldn't be possible maybe just check and make sure the
-    // coordinates are
-    // valid just in case
     Cell clickedCell = this.board.initialCell.getCell(tileX, tileY);
     if (buttonPressed.equals("LeftButton")) {
       if (timeStart == false) {
@@ -915,6 +1196,10 @@ class MineSweeperWorld extends World {
   // Basically trying at any available moment to short circuit the boolean
   // expression
   // and stop any code execution that isn't necessary
+
+  // Determines if the game has been won by the player or not
+  // EFFECT: Mutates result to (result AND gameWon(neighbor, visited)) if neighbor is not null, not contained in visited, not revealed, and does not contain a mine
+  // EFFECT: Mutates visited to have neighbor added to it if neighbor is not null, not contained in visited, not revealed, and does not contain a mine
   public boolean gameWon(Cell cell, HashSet<Cell> visited) {
     boolean result = true;
     if (!cell.revealed && !cell.hasMine) {
@@ -937,10 +1222,15 @@ class MineSweeperWorld extends World {
     return result;
   }
 
+  // Determines if the game has been lost by the player
   public boolean gameLost() {
     return hitMine || displayedTime >= 999;
   }
 
+  // Draws the final scene to the screen when the player either wins or loses the game
+  // EFFECT: Mutates timeStart to false if the game is lost
+  // EFFECT: Mutates worldScene to display the losing game board if the game is lost
+  // EFFECT: Mutates worldScene to display the winning game board if the game is won
   @Override
   public WorldEnd worldEnds() {
     if (gameLost()) {
@@ -959,7 +1249,20 @@ class MineSweeperWorld extends World {
   }
 }
 
+// Starts and runs the game of MineSweeper. Validates the starting configuration of the game
+// to ensure they are valid before starting it
 public class MineSweeper {
+  /* Template
+     *
+     * Fields:
+     * 
+     * Methods:
+     * this.runGame(int tileWidth, int tileHeight, int numMines) -- void
+     * 
+     * Methods on fields:
+     * 
+     */
+
   static void runGame(int tileWidth, int tileHeight, int numMines) {
     if (tileWidth < 8) {
       System.out.println("Cannot run a game with a tile width smaller than 8");
@@ -983,11 +1286,11 @@ public class MineSweeper {
     int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
         + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
         + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
-    double tickRate = 0.5;
+    double tickRate = 0.1;
     MineSweeperWorld gameWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, numMines,
         tickRate);
 
-    gameWorld.bigBang(pixelWidth, pixelHeight, 0.1);
+    gameWorld.bigBang(pixelWidth, pixelHeight, tickRate);
   }
 
   public static void main(String[] args) {
@@ -996,5 +1299,203 @@ public class MineSweeper {
 }
 
 class TestMineSweeper {
+  void testCellGetTopMiddleNeighbor(Tester t) {
+    
+  }
+  
+  void testCellSetTopMiddleNeighbor(Tester t) {
+    // TODO
+  }
 
+  void testCellGetBottomMiddleNeighbor(Tester t) {
+    // TODO
+  }
+  
+  void testCellSetBottomMiddleNeighbor(Tester t) {
+    // TODO
+  }
+
+  void testCellGetMiddleLeftNeighbor(Tester t) {
+    // TODO
+  }
+  
+  void testCellSetMiddleLeftNeighbor(Tester t) {
+    // TODO
+  }
+
+  void testCellGetMiddleRightNeighbor(Tester t) {
+    // TODO
+  }
+  
+  void testCellSetMiddleRightNeighbor(Tester t) {
+    // TODO
+  }
+
+  void testCellGetTopLeftNeighbor(Tester t) {
+    // TODO
+  }
+  
+  void testCellSetTopLeftNeighbor(Tester t) {
+    // TODO
+  }
+
+  void testCellGetTopRightNeighbor(Tester t) {
+    // TODO
+  }
+  
+  void testCellSetTopRightNeighbor(Tester t) {
+    // TODO
+  }
+
+  void testCellGetBottomLeftNeighbor(Tester t) {
+    // TODO
+  }
+  
+  void testCellSetBottomLeftNeighbor(Tester t) {
+    // TODO
+  }
+
+  void testCellGetBottomRightNeighbor(Tester t) {
+    // TODO
+  }
+  
+  void testCellSetBottomRightNeighbor(Tester t) {
+    // TODO
+  }
+
+  void testCellGetCell(Tester t) {
+    // TODO
+  }
+
+  void testCellNumMinesAdjacent(Tester t) {
+    // TODO
+  }
+
+  void testBoardStitchRows(Tester t) {
+    // TODO
+  }
+
+  void testBoardInitializeBoard(Tester t) {
+    // TODO
+  }
+
+  void testBoardSwap(Tester t) {
+    // TODO
+  }
+
+  void testBoardFisherYatesShuffle(Tester t) {
+    // TODO
+  }
+
+  void testBoardInitializeMines(Tester t) {
+    // TODO
+  }
+
+  void testConstPropsDetermineImageFromCell(Tester t) {
+    // TODO
+  }
+
+  void testConstPropsGameLostDetermineImageFromCell(Tester t) {
+    // TODO
+  }
+
+  void testConstProps(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldMakeScene(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldInitializeWorldScene(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldCreateScoreboardTopBorder(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldCreateScoreboardBottomBorder(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldPow(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldGetNthDigit(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldCreateScoreboardMineCounter(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldCreateScoreboardTimer(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldCreateScoreboard(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldCreateLostScoreboard(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldCreateTileRows(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldCreateLostTileRows(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldCreateBottomBorder(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldCreateGameBoardImage(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldCreateLostGameBoardImage(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldOnTick(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldFloodFill(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldOnMousePressed(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldOnMouseReleased(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldOnMouseClicked(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldGameWon(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldGameLost(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperWorldWorldEnds(Tester t) {
+    // TODO
+  }
+
+  void testMineSweeperRunGame(Tester t) {
+    // TODO
+  }
 }
