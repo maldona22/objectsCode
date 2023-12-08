@@ -1300,67 +1300,155 @@ public class MineSweeper {
 
 class TestMineSweeper {
   void testCellGetTopMiddleNeighbor(Tester t) {
-    
+    Cell testCell = new Cell();
+    Cell testCellAbove = new Cell();
+    testCell.setTopMiddleNeighbor(testCellAbove);
+    t.checkExpect(testCell.getTopMiddleNeighbor(), testCellAbove);
+
+    Cell testCell2 = new Cell();
+    Cell testCell2Above = new Cell();
+    testCell2.neighbors.set(1, testCell2Above);
+    t.checkExpect(testCell2.getTopMiddleNeighbor(), testCell2Above);
   }
-  
+
   void testCellSetTopMiddleNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellAbove = new Cell();
+    testCell.setTopMiddleNeighbor(testCellAbove);
+    t.checkExpect(testCell.neighbors.get(1), testCellAbove);
   }
 
   void testCellGetBottomMiddleNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellBelow = new Cell();
+    testCell.setBottomMiddleNeighbor(testCellBelow);
+    t.checkExpect(testCell.getBottomMiddleNeighbor(), testCellBelow);
+
+    Cell testCell2 = new Cell();
+    Cell testCell2Below = new Cell();
+    testCell2.neighbors.set(6, testCell2Below);
+    t.checkExpect(testCell2.getBottomMiddleNeighbor(), testCell2Below);
   }
   
   void testCellSetBottomMiddleNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellBelow = new Cell();
+    testCell.setBottomMiddleNeighbor(testCellBelow);
+    t.checkExpect(testCell.neighbors.get(6), testCellBelow);
   }
 
   void testCellGetMiddleLeftNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellLeft = new Cell();
+    testCell.setMiddleLeftNeighbor(testCellLeft);
+    t.checkExpect(testCell.getMiddleLeftNeighbor(), testCellLeft);
+
+    Cell testCell2 = new Cell();
+    Cell testCell2Left = new Cell();
+    testCell2.neighbors.set(3, testCell2Left);
+    t.checkExpect(testCell2.getMiddleLeftNeighbor(), testCell2Left);
   }
   
   void testCellSetMiddleLeftNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellLeft = new Cell();
+    testCell.setMiddleLeftNeighbor(testCellLeft);
+    t.checkExpect(testCell.neighbors.get(3), testCellLeft);
   }
 
   void testCellGetMiddleRightNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellRight = new Cell();
+    testCell.setMiddleRightNeighbor(testCellRight);
+    t.checkExpect(testCell.getMiddleRightNeighbor(), testCellRight);
+
+    Cell testCell2 = new Cell();
+    Cell testCell2Right = new Cell();
+    testCell2.neighbors.set(4, testCell2Right);
+    t.checkExpect(testCell2.getMiddleRightNeighbor(), testCell2Right);
   }
   
   void testCellSetMiddleRightNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellRight = new Cell();
+    testCell.setMiddleRightNeighbor(testCellRight);
+    t.checkExpect(testCell.neighbors.get(4), testCellRight);
   }
 
   void testCellGetTopLeftNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellAboveLeft = new Cell();
+    testCell.setTopLeftNeighbor(testCellAboveLeft);
+    t.checkExpect(testCell.getTopLeftNeighbor(), testCellAboveLeft);
+
+    Cell testCell2 = new Cell();
+    Cell testCell2AboveLeft = new Cell();
+    testCell2.neighbors.set(0, testCell2AboveLeft);
+    t.checkExpect(testCell2.getTopLeftNeighbor(), testCell2AboveLeft);
   }
   
   void testCellSetTopLeftNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellAboveLeft = new Cell();
+    testCell.setTopLeftNeighbor(testCellAboveLeft);
+    t.checkExpect(testCell.neighbors.get(0), testCellAboveLeft);
   }
 
   void testCellGetTopRightNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellAboveRight = new Cell();
+    testCell.setTopRightNeighbor(testCellAboveRight);
+    t.checkExpect(testCell.getTopRightNeighbor(), testCellAboveRight);
+
+    Cell testCell2 = new Cell();
+    Cell testCell2AboveRight = new Cell();
+    testCell2.neighbors.set(2, testCell2AboveRight);
+    t.checkExpect(testCell2.getTopRightNeighbor(), testCell2AboveRight);
   }
   
   void testCellSetTopRightNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellAboveRight = new Cell();
+    testCell.setTopRightNeighbor(testCellAboveRight);
+    t.checkExpect(testCell.neighbors.get(2), testCellAboveRight);
   }
 
   void testCellGetBottomLeftNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellBelowLeft = new Cell();
+    testCell.setBottomLeftNeighbor(testCellBelowLeft);
+    t.checkExpect(testCell.getBottomLeftNeighbor(), testCellBelowLeft);
+
+    Cell testCell2 = new Cell();
+    Cell testCell2BelowLeft = new Cell();
+    testCell2.neighbors.set(5, testCell2BelowLeft);
+    t.checkExpect(testCell2.getBottomLeftNeighbor(), testCell2BelowLeft);
   }
   
   void testCellSetBottomLeftNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellBelowLeft = new Cell();
+    testCell.setBottomLeftNeighbor(testCellBelowLeft);
+    t.checkExpect(testCell.neighbors.get(5), testCellBelowLeft);
   }
 
   void testCellGetBottomRightNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellBelowRight = new Cell();
+    testCell.setBottomRightNeighbor(testCellBelowRight);
+    t.checkExpect(testCell.getBottomRightNeighbor(), testCellBelowRight);
+
+    Cell testCell2 = new Cell();
+    Cell testCell2BelowRight = new Cell();
+    testCell2.neighbors.set(7, testCell2BelowRight);
+    t.checkExpect(testCell2.getBottomRightNeighbor(), testCell2BelowRight);
   }
   
   void testCellSetBottomRightNeighbor(Tester t) {
-    // TODO
+    Cell testCell = new Cell();
+    Cell testCellBelowRight = new Cell();
+    testCell.setBottomRightNeighbor(testCellBelowRight);
+    t.checkExpect(testCell.neighbors.get(7), testCellBelowRight);
   }
 
   void testCellGetCell(Tester t) {
@@ -1380,7 +1468,15 @@ class TestMineSweeper {
   }
 
   void testBoardSwap(Tester t) {
-    // TODO
+    Board testBoard = new Board(9, 9, 1);
+    ArrayList<Cell> testList = new ArrayList<Cell>();
+    Cell testCell1 = new Cell();
+    Cell testCell2 = new Cell();
+    testList.add(0, testCell1);
+    testList.add(1, testCell2);
+    testBoard.swap(testList, 0, 1);
+    t.checkExpect(testList.get(0), testCell2);
+    t.checkExpect(testList.get(1), testCell1);
   }
 
   void testBoardFisherYatesShuffle(Tester t) {
@@ -1396,10 +1492,6 @@ class TestMineSweeper {
   }
 
   void testConstPropsGameLostDetermineImageFromCell(Tester t) {
-    // TODO
-  }
-
-  void testConstProps(Tester t) {
     // TODO
   }
 
