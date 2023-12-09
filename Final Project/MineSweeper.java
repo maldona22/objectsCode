@@ -8,6 +8,9 @@ import javalib.impworld.*;
 import javalib.worldimages.*;
 import tester.Tester;
 
+// SEE NOTE IN TESTS BELOW REGARDING THIS IMPORT
+//import org.apache.commons.math3.distribution.ChiSquaredDistribution;
+
 
 // The data structure behind each individual tile on the gameboard
 class Cell {
@@ -518,11 +521,9 @@ final class ConstProps {
      */
 
   // As determined via the profiler used (VisualVM), calling getWidth() and
-  // getHeight()
-  // on images was actually suprisingly expensive as an aggregate
+  // getHeight() on images was actually suprisingly expensive as an aggregate
   // Additionally, by hard coding them with their already known values
-  // we no longer have to cast the result of getWidth() and getHeight() back to an
-  // integer
+  // we no longer have to cast the result of getWidth() and getHeight() back to an integer
   // Hence the reason for all of these width and height variables below
   final static int scoreboardLeftBorderSegmentWidth = 15;
   final static int scoreboardRightBorderSegmentWidth = 15;
@@ -533,6 +534,10 @@ final class ConstProps {
   final static int tileRightBorderSegmentWidth = 15;
   final static int heightScoreboardBackground = 48;
   final static int tileBottomBorderSegmentHeight = 15;
+  final static int tileBottomBorderLeftCornerWidth = 15;
+  final static int tileBottomBorderRightCornerWidth = 15;
+   final static int tileBottomBorderLeftCornerHeight = 15;
+  final static int tileBottomBorderRightCornerHeight = 15;
   final static int scoreboardBottomBorderSegmentHeight = 15;
   final static int mineCounterWidth = 60;
   final static int mineCounterHeight = 34;
@@ -543,23 +548,23 @@ final class ConstProps {
   final static Color scoreboardBackgroundColor = new Color(192, 192, 192);
 
   // The images used to display the border around the scoreboard
-  final static FromFileImage scoreboardBottomBorderSegment = new FromFileImage("ScoreboardBottomBorderSegment.png");
-  final static FromFileImage scoreboardTopBorderSegment = new FromFileImage("ScoreboardTopBorderSegment.png");
-  final static FromFileImage scoreboardLeftBorderSegment = new FromFileImage("ScoreboardLeftBorder.png");
-  final static FromFileImage scoreboardRightBorderSegment = new FromFileImage("ScoreboardRightBorder.png");
+  final static FromFileImage scoreboardBottomBorderSegment = new FromFileImage("resources/ScoreboardBottomBorderSegment.png");
+  final static FromFileImage scoreboardTopBorderSegment = new FromFileImage("resources/ScoreboardTopBorderSegment.png");
+  final static FromFileImage scoreboardLeftBorderSegment = new FromFileImage("resources/ScoreboardLeftBorder.png");
+  final static FromFileImage scoreboardRightBorderSegment = new FromFileImage("resources/ScoreboardRightBorder.png");
 
   // The images used to display the numbers on the scoreboard
   // Used both for the timer and for the unflagged mine counter
-  final static FromFileImage scoreboardCounterZero = new FromFileImage("Scoreboard0.png");
-  final static FromFileImage scoreboardCounterOne = new FromFileImage("Scoreboard1.png");
-  final static FromFileImage scoreboardCounterTwo = new FromFileImage("Scoreboard2.png");
-  final static FromFileImage scoreboardCounterThree = new FromFileImage("Scoreboard3.png");
-  final static FromFileImage scoreboardCounterFour = new FromFileImage("Scoreboard4.png");
-  final static FromFileImage scoreboardCounterFive = new FromFileImage("Scoreboard5.png");
-  final static FromFileImage scoreboardCounterSix = new FromFileImage("Scoreboard6.png");
-  final static FromFileImage scoreboardCounterSeven = new FromFileImage("Scoreboard7.png");
-  final static FromFileImage scoreboardCounterEight = new FromFileImage("Scoreboard8.png");
-  final static FromFileImage scoreboardCounterNine = new FromFileImage("Scoreboard9.png");
+  final static FromFileImage scoreboardCounterZero = new FromFileImage("resources/Scoreboard0.png");
+  final static FromFileImage scoreboardCounterOne = new FromFileImage("resources/Scoreboard1.png");
+  final static FromFileImage scoreboardCounterTwo = new FromFileImage("resources/Scoreboard2.png");
+  final static FromFileImage scoreboardCounterThree = new FromFileImage("resources/Scoreboard3.png");
+  final static FromFileImage scoreboardCounterFour = new FromFileImage("resources/Scoreboard4.png");
+  final static FromFileImage scoreboardCounterFive = new FromFileImage("resources/Scoreboard5.png");
+  final static FromFileImage scoreboardCounterSix = new FromFileImage("resources/Scoreboard6.png");
+  final static FromFileImage scoreboardCounterSeven = new FromFileImage("resources/Scoreboard7.png");
+  final static FromFileImage scoreboardCounterEight = new FromFileImage("resources/Scoreboard8.png");
+  final static FromFileImage scoreboardCounterNine = new FromFileImage("resources/Scoreboard9.png");
 
   // Used to map an int to its respective image respresentation
   final static ArrayList<FromFileImage> counterImages = new ArrayList<FromFileImage>(
@@ -570,30 +575,30 @@ final class ConstProps {
   // The images used to make up the border around the rows of tiles the player
   // interacts with
   // during gameplay
-  final static FromFileImage tileLeftBorderSegment = new FromFileImage("TileLeftBorderSegment.png");
-  final static FromFileImage tileRightBorderSegment = new FromFileImage("TileRightBorderSegment.png");
-  final static FromFileImage tileBottomBorderLeftCorner = new FromFileImage("TileLeftBorderBottomCorner.png");
-  final static FromFileImage tileBottomBorderRightCorner = new FromFileImage("TileRightBorderBottomCorner.png");
-  final static FromFileImage tileBottomBorderSegment = new FromFileImage("TileBottomBorderSegment.png");
+  final static FromFileImage tileLeftBorderSegment = new FromFileImage("resources/TileLeftBorderSegment.png");
+  final static FromFileImage tileRightBorderSegment = new FromFileImage("resources/TileRightBorderSegment.png");
+  final static FromFileImage tileBottomBorderLeftCorner = new FromFileImage("resources/TileLeftBorderBottomCorner.png");
+  final static FromFileImage tileBottomBorderRightCorner = new FromFileImage("resources/TileRightBorderBottomCorner.png");
+  final static FromFileImage tileBottomBorderSegment = new FromFileImage("resources/TileBottomBorderSegment.png");
 
   // The images used to display the smiley face in the middle of the scoreboard
   // Depicts when the user is left clicking, has won, or has lost
-  final static FromFileImage smileUnpressed = new FromFileImage("SmileUnpressed.png");
-  final static FromFileImage smilePressed = new FromFileImage("SmilePressed.png");
-  final static FromFileImage smileClick = new FromFileImage("SmileTilePressed.png");
-  final static FromFileImage smileLost = new FromFileImage("SmileLost.png");
-  final static FromFileImage smileWon = new FromFileImage("SmileWon.png");
+  final static FromFileImage smileUnpressed = new FromFileImage("resources/SmileUnpressed.png");
+  final static FromFileImage smilePressed = new FromFileImage("resources/SmilePressed.png");
+  final static FromFileImage smileClick = new FromFileImage("resources/SmileTilePressed.png");
+  final static FromFileImage smileLost = new FromFileImage("resources/SmileLost.png");
+  final static FromFileImage smileWon = new FromFileImage("resources/SmileWon.png");
 
   // The images used to reveal the number of adjacent mines for any given cell
-  final static FromFileImage zeroAdjMines = new FromFileImage("0.png");
-  final static FromFileImage oneAdjMines = new FromFileImage("1.png");
-  final static FromFileImage twoAdjMines = new FromFileImage("2.png");
-  final static FromFileImage threeAdjMines = new FromFileImage("3.png");
-  final static FromFileImage fourAdjMines = new FromFileImage("4.png");
-  final static FromFileImage fiveAdjMines = new FromFileImage("5.png");
-  final static FromFileImage sixAdjMines = new FromFileImage("6.png");
-  final static FromFileImage sevenAdjMines = new FromFileImage("7.png");
-  final static FromFileImage eightAdjMines = new FromFileImage("8.png");
+  final static FromFileImage zeroAdjMines = new FromFileImage("resources/0.png");
+  final static FromFileImage oneAdjMines = new FromFileImage("resources/1.png");
+  final static FromFileImage twoAdjMines = new FromFileImage("resources/2.png");
+  final static FromFileImage threeAdjMines = new FromFileImage("resources/3.png");
+  final static FromFileImage fourAdjMines = new FromFileImage("resources/4.png");
+  final static FromFileImage fiveAdjMines = new FromFileImage("resources/5.png");
+  final static FromFileImage sixAdjMines = new FromFileImage("resources/6.png");
+  final static FromFileImage sevenAdjMines = new FromFileImage("resources/7.png");
+  final static FromFileImage eightAdjMines = new FromFileImage("resources/8.png");
 
   // Used to map an int to its respective image respresentation
   final static ArrayList<FromFileImage> numberedTileImages = new ArrayList<FromFileImage>(
@@ -601,19 +606,19 @@ final class ConstProps {
           sixAdjMines, sevenAdjMines, eightAdjMines));
 
   // The default image displayed across the game board
-  final static FromFileImage unknownAdjMines = new FromFileImage("Unknown.png");
+  final static FromFileImage unknownAdjMines = new FromFileImage("resources/Unknown.png");
 
   // The image used to display a flag
-  final static FromFileImage flag = new FromFileImage("Flag.png");
+  final static FromFileImage flag = new FromFileImage("resources/Flag.png");
 
   // The image used to display unflagged mines once the game has been lost
-  final static FromFileImage unflaggedMine = new FromFileImage("MineUnflagged.png");
+  final static FromFileImage unflaggedMine = new FromFileImage("resources/MineUnflagged.png");
 
   // The image used to display flagged mines once the game has been lost
-  final static FromFileImage flaggedMine = new FromFileImage("MineFlagged.png");
+  final static FromFileImage flaggedMine = new FromFileImage("resources/MineFlagged.png");
 
   // The image used to display the mine the player hit when they lost the game
-  final static FromFileImage detonatedMine = new FromFileImage("Detonated.png");
+  final static FromFileImage detonatedMine = new FromFileImage("resources/Detonated.png");
 
   // Returns the appropriate image to display based upon the properties of the given cell
   static WorldImage determineImageFromCell(Cell cell) {
@@ -780,7 +785,7 @@ class MineSweeperWorld extends World {
 
   // Originally the images drawn to the screen were created in here and everything was drawn
   // every tick using loops where the (x,y) position of any given cell was never directly dealt with
-  // This was incredibly slow.
+  // This was... slow.
   // For reference, the timer on screen took on average 2.637 times longer to tick up
   // compared to the implementation currently being used (10 trials, Std = 0.225588)
   // Additionally, according to the profiler I used (VisualVM) >99% of cpu time
@@ -831,7 +836,7 @@ class MineSweeperWorld extends World {
 
   // Using this so I don't have to cast the result of Math.pow back to an int
   // Calculates the result of num to the power of exp
-  int pow(int num, int exp) {
+  static int pow(int num, int exp) {
     if (exp > 0) {
       return num * pow(num, exp - 1);
     } else {
@@ -843,7 +848,7 @@ class MineSweeperWorld extends World {
   // where the nthPos starts from the back and 1 rather than 0
   // Ex. the result of getNthDigit(123, 3) is 3
   // Ex. the result of getNthDigit(123, 1) is 1
-  int getNthDigit(int num, int nthPos) {
+  static int getNthDigit(int num, int nthPos) {
     return (num / pow(10, nthPos - 1)) % 10;
   }
 
@@ -1095,6 +1100,7 @@ class MineSweeperWorld extends World {
 
   // Displays the worried smile face when the player is left clicking
   // EFFECT: Mutates worldScene so that smileClick is being displayed in the game
+  // EFFECT: Mutates mouseClicked to true
   @Override
   public void onMousePressed(Posn pos, String buttonPressed) {
     if (buttonPressed.equals("LeftButton")) {
@@ -1286,7 +1292,7 @@ public class MineSweeper {
     int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
         + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
         + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
-    double tickRate = 0.1;
+    double tickRate = 1;
     MineSweeperWorld gameWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, numMines,
         tickRate);
 
@@ -1299,6 +1305,79 @@ public class MineSweeper {
 }
 
 class TestMineSweeper {
+
+  /*
+  double chiSquareTesterShuffling(int numElems, int numShuffles) {
+    Board board = new Board(9, 9, 1);
+    ArrayList<Integer> baseList = new ArrayList<Integer>();
+    ArrayList<ArrayList<Integer>> histogramForEachCard = new ArrayList<>();
+    double expectValue = numShuffles / numElems;
+    ArrayList<ArrayList<Double>> oMinusESquareOverEForEachCard = new ArrayList<>();
+    for (int i = 0; i < numElems; i++) {
+      baseList.add(i);
+    }
+    for (int i = 0; i < numElems; i++) {
+      ArrayList<Integer> histogram = new ArrayList<>();
+      for (int j = 0; j < numElems; j++) {
+        histogram.add(j, 0);
+      }
+      histogramForEachCard.add(histogram);
+    }
+  
+    for (int i = 0; i < numShuffles; i++) {
+      ArrayList<Integer> testList = (ArrayList<Integer>) baseList.clone();
+      board.fisherYatesShuffle(testList, numElems);
+      for (int j = 0; j < numElems; j++) {
+        ArrayList<Integer> currentCard = histogramForEachCard.get(j);
+        currentCard.set(testList.get(j), currentCard.get(testList.get(j)) + 1);
+      }
+    }
+  
+    for (int i = 0; i < numElems; i++) {
+      ArrayList<Double> obvsMinusExpectSquareOverExpect = new ArrayList<>();
+      for (int j = 0; j < numElems; j++) {
+        int observed = histogramForEachCard.get(i).get(j);
+        obvsMinusExpectSquareOverExpect.add(j, Math.pow((observed - expectValue), 2) / expectValue);
+      }
+      oMinusESquareOverEForEachCard.add(i, obvsMinusExpectSquareOverExpect);
+    }
+    
+    double chiSquare = 0;
+    for (ArrayList<Double> list : oMinusESquareOverEForEachCard) {
+      for (double num : list) {
+        chiSquare += num;
+      }
+    }
+    System.out.println(chiSquare);
+    int degreesOfFreedom = (numElems - 1) * (numElems - 1);
+    ChiSquaredDistribution chiDist = new ChiSquaredDistribution(degreesOfFreedom);
+    return 1 - chiDist.cumulativeProbability(chiSquare);
+  }
+  
+  
+  // NOTE:
+  // This test uses statstics to be certain that the shuffling algorithm is working
+  // as intended. If you want to run this particular test you need to add the 
+  // apache commons math library to your project, you can find it in ./lib/
+  //
+  // If you want the specifics on the statistics used, I'm using a chi squared test
+  // to ensure there is a uniform distribution of where any particular value is 
+  // shuffled to. I figured this would be a more useful test, since if this
+  // test fails in *any* regular occurence I know that the function only
+  // *appears* to be functioning correctly
+  void testBoardFisherYatesShuffle(Tester t) {
+    // Test using a simulated deck of cards
+    t.checkExpect(chiSquareTesterShuffling(52, 520) > 0.05, true);
+  }
+  
+  void testBoardInitializeMines(Tester t) {
+    // TODO
+    // Need to double check the statistics for this test
+  }
+  
+  
+  */
+
   void testCellGetTopMiddleNeighbor(Tester t) {
     Cell testCell = new Cell();
     Cell testCellAbove = new Cell();
@@ -1329,7 +1408,7 @@ class TestMineSweeper {
     testCell2.neighbors.set(6, testCell2Below);
     t.checkExpect(testCell2.getBottomMiddleNeighbor(), testCell2Below);
   }
-  
+
   void testCellSetBottomMiddleNeighbor(Tester t) {
     Cell testCell = new Cell();
     Cell testCellBelow = new Cell();
@@ -1348,7 +1427,7 @@ class TestMineSweeper {
     testCell2.neighbors.set(3, testCell2Left);
     t.checkExpect(testCell2.getMiddleLeftNeighbor(), testCell2Left);
   }
-  
+
   void testCellSetMiddleLeftNeighbor(Tester t) {
     Cell testCell = new Cell();
     Cell testCellLeft = new Cell();
@@ -1367,7 +1446,7 @@ class TestMineSweeper {
     testCell2.neighbors.set(4, testCell2Right);
     t.checkExpect(testCell2.getMiddleRightNeighbor(), testCell2Right);
   }
-  
+
   void testCellSetMiddleRightNeighbor(Tester t) {
     Cell testCell = new Cell();
     Cell testCellRight = new Cell();
@@ -1386,7 +1465,7 @@ class TestMineSweeper {
     testCell2.neighbors.set(0, testCell2AboveLeft);
     t.checkExpect(testCell2.getTopLeftNeighbor(), testCell2AboveLeft);
   }
-  
+
   void testCellSetTopLeftNeighbor(Tester t) {
     Cell testCell = new Cell();
     Cell testCellAboveLeft = new Cell();
@@ -1405,7 +1484,7 @@ class TestMineSweeper {
     testCell2.neighbors.set(2, testCell2AboveRight);
     t.checkExpect(testCell2.getTopRightNeighbor(), testCell2AboveRight);
   }
-  
+
   void testCellSetTopRightNeighbor(Tester t) {
     Cell testCell = new Cell();
     Cell testCellAboveRight = new Cell();
@@ -1424,7 +1503,7 @@ class TestMineSweeper {
     testCell2.neighbors.set(5, testCell2BelowLeft);
     t.checkExpect(testCell2.getBottomLeftNeighbor(), testCell2BelowLeft);
   }
-  
+
   void testCellSetBottomLeftNeighbor(Tester t) {
     Cell testCell = new Cell();
     Cell testCellBelowLeft = new Cell();
@@ -1443,7 +1522,7 @@ class TestMineSweeper {
     testCell2.neighbors.set(7, testCell2BelowRight);
     t.checkExpect(testCell2.getBottomRightNeighbor(), testCell2BelowRight);
   }
-  
+
   void testCellSetBottomRightNeighbor(Tester t) {
     Cell testCell = new Cell();
     Cell testCellBelowRight = new Cell();
@@ -1452,19 +1531,179 @@ class TestMineSweeper {
   }
 
   void testCellGetCell(Tester t) {
-    // TODO
+    Cell zeroZero = new Cell();
+    Cell zeroOne = new Cell();
+    Cell zeroTwo = new Cell();
+    Cell oneZero = new Cell();
+    Cell oneOne = new Cell();
+    Cell oneTwo = new Cell();
+    Cell twoZero = new Cell();
+    Cell twoOne = new Cell();
+    Cell twoTwo = new Cell();
+
+    zeroZero.setMiddleRightNeighbor(oneZero);
+    zeroZero.setBottomMiddleNeighbor(zeroOne);
+    zeroZero.setBottomRightNeighbor(oneOne);
+
+    oneZero.setMiddleLeftNeighbor(zeroZero);
+    oneZero.setMiddleRightNeighbor(twoZero);
+    oneZero.setBottomLeftNeighbor(zeroOne);
+    oneZero.setBottomMiddleNeighbor(oneOne);
+    oneZero.setBottomRightNeighbor(twoOne);
+
+    twoZero.setMiddleLeftNeighbor(oneZero);
+    twoZero.setBottomLeftNeighbor(oneOne);
+    twoZero.setBottomMiddleNeighbor(twoOne);
+
+    zeroOne.setTopMiddleNeighbor(zeroZero);
+    zeroOne.setTopRightNeighbor(oneZero);
+    zeroOne.setMiddleRightNeighbor(oneOne);
+    zeroOne.setBottomRightNeighbor(oneTwo);
+    zeroOne.setBottomMiddleNeighbor(zeroTwo);
+
+    oneOne.setTopLeftNeighbor(zeroZero);
+    oneOne.setTopMiddleNeighbor(oneZero);
+    oneOne.setTopRightNeighbor(twoZero);
+    oneOne.setMiddleLeftNeighbor(zeroOne);
+    oneOne.setMiddleRightNeighbor(twoOne);
+    oneOne.setBottomLeftNeighbor(zeroTwo);
+    oneOne.setBottomMiddleNeighbor(oneTwo);
+    oneOne.setBottomRightNeighbor(twoTwo);
+
+    twoOne.setTopLeftNeighbor(oneZero);
+    twoOne.setTopMiddleNeighbor(twoZero);
+    twoOne.setMiddleLeftNeighbor(oneOne);
+    twoOne.setBottomLeftNeighbor(oneTwo);
+    twoOne.setBottomMiddleNeighbor(twoTwo);
+
+    zeroTwo.setTopMiddleNeighbor(zeroOne);
+    zeroTwo.setTopRightNeighbor(oneOne);
+    zeroTwo.setMiddleRightNeighbor(oneTwo);
+
+    oneTwo.setMiddleLeftNeighbor(zeroTwo);
+    oneTwo.setTopLeftNeighbor(zeroOne);
+    oneTwo.setTopMiddleNeighbor(oneOne);
+    oneTwo.setTopRightNeighbor(twoOne);
+    oneTwo.setMiddleRightNeighbor(twoTwo);
+
+    twoTwo.setMiddleLeftNeighbor(oneTwo);
+    twoTwo.setTopLeftNeighbor(oneOne);
+    twoTwo.setTopMiddleNeighbor(twoOne);
+
+    t.checkExpect(zeroZero.getCell(2, 2), twoTwo);
+    t.checkExpect(zeroZero.getCell(0, 0), zeroZero);
   }
 
   void testCellNumMinesAdjacent(Tester t) {
-    // TODO
+    Cell zeroZero = new Cell();
+    Cell zeroOne = new Cell();
+    Cell zeroTwo = new Cell();
+    Cell oneZero = new Cell();
+    Cell oneOne = new Cell();
+    Cell oneTwo = new Cell();
+    Cell twoZero = new Cell();
+    Cell twoOne = new Cell();
+    Cell twoTwo = new Cell();
+
+    zeroZero.setMiddleRightNeighbor(oneZero);
+    zeroZero.setBottomMiddleNeighbor(zeroOne);
+    zeroZero.setBottomRightNeighbor(oneOne);
+
+    oneZero.setMiddleLeftNeighbor(zeroZero);
+    oneZero.setMiddleRightNeighbor(twoZero);
+    oneZero.setBottomLeftNeighbor(zeroOne);
+    oneZero.setBottomMiddleNeighbor(oneOne);
+    oneZero.setBottomRightNeighbor(twoOne);
+
+    twoZero.setMiddleLeftNeighbor(oneZero);
+    twoZero.setBottomLeftNeighbor(oneOne);
+    twoZero.setBottomMiddleNeighbor(twoOne);
+
+    zeroOne.setTopMiddleNeighbor(zeroZero);
+    zeroOne.setTopRightNeighbor(oneZero);
+    zeroOne.setMiddleRightNeighbor(oneOne);
+    zeroOne.setBottomRightNeighbor(oneTwo);
+    zeroOne.setBottomMiddleNeighbor(zeroTwo);
+
+    oneOne.setTopLeftNeighbor(zeroZero);
+    oneOne.setTopMiddleNeighbor(oneZero);
+    oneOne.setTopRightNeighbor(twoZero);
+    oneOne.setMiddleLeftNeighbor(zeroOne);
+    oneOne.setMiddleRightNeighbor(twoOne);
+    oneOne.setBottomLeftNeighbor(zeroTwo);
+    oneOne.setBottomMiddleNeighbor(oneTwo);
+    oneOne.setBottomRightNeighbor(twoTwo);
+
+    twoOne.setTopLeftNeighbor(oneZero);
+    twoOne.setTopMiddleNeighbor(twoZero);
+    twoOne.setMiddleLeftNeighbor(oneOne);
+    twoOne.setBottomLeftNeighbor(oneTwo);
+    twoOne.setBottomMiddleNeighbor(twoTwo);
+
+    zeroTwo.setTopMiddleNeighbor(zeroOne);
+    zeroTwo.setTopRightNeighbor(oneOne);
+    zeroTwo.setMiddleRightNeighbor(oneTwo);
+
+    oneTwo.setMiddleLeftNeighbor(zeroTwo);
+    oneTwo.setTopLeftNeighbor(zeroOne);
+    oneTwo.setTopMiddleNeighbor(oneOne);
+    oneTwo.setTopRightNeighbor(twoOne);
+    oneTwo.setMiddleRightNeighbor(twoTwo);
+
+    twoTwo.setMiddleLeftNeighbor(oneTwo);
+    twoTwo.setTopLeftNeighbor(oneOne);
+    twoTwo.setTopMiddleNeighbor(twoOne);
+
+    zeroZero.hasMine = true;
+    twoZero.hasMine = true;
+    zeroOne.hasMine = true;
+
+    t.checkExpect(oneOne.numOfMinesAdjacent(), 3);
   }
 
   void testBoardStitchRows(Tester t) {
-    // TODO
+    Board testBoard = new Board(9, 9, 1);
+    Cell zeroZero = new Cell();
+    Cell zeroOne = new Cell();
+    Cell zeroTwo = new Cell();
+    Cell oneZero = new Cell();
+    Cell oneOne = new Cell();
+    Cell oneTwo = new Cell();
+    Cell twoZero = new Cell();
+    Cell twoOne = new Cell();
+    Cell twoTwo = new Cell();
+
+    zeroZero.setMiddleRightNeighbor(oneZero);
+    oneZero.setMiddleLeftNeighbor(zeroZero);
+    oneZero.setMiddleRightNeighbor(twoZero);
+    twoZero.setMiddleLeftNeighbor(oneZero);
+
+    zeroOne.setMiddleRightNeighbor(oneOne);
+    oneOne.setMiddleLeftNeighbor(zeroOne);
+    oneOne.setMiddleRightNeighbor(twoOne);
+    twoOne.setMiddleLeftNeighbor(oneOne);
+
+    zeroTwo.setMiddleRightNeighbor(oneTwo);
+    oneTwo.setMiddleLeftNeighbor(zeroTwo);
+    oneTwo.setMiddleRightNeighbor(twoTwo);
+    twoTwo.setMiddleLeftNeighbor(oneTwo);
+
+    testBoard.stitchRows(zeroZero, zeroOne);
+    t.checkExpect(oneOne.getTopLeftNeighbor(), zeroZero);
+    t.checkExpect(oneOne.getTopMiddleNeighbor(), oneZero);
+    t.checkExpect(oneOne.getTopRightNeighbor(), twoZero);
+    t.checkExpect(oneZero.getBottomLeftNeighbor(), zeroOne);
+    t.checkExpect(oneZero.getBottomMiddleNeighbor(), oneOne);
+    t.checkExpect(oneZero.getBottomRightNeighbor(), twoOne);
   }
 
   void testBoardInitializeBoard(Tester t) {
-    // TODO
+    Board testBoard = new Board(9, 9, 1);
+    Cell testGraph = new Cell();
+    testBoard.initializeBoard(testGraph);
+    t.checkExpect(testGraph.getCell(9, 9) != null, true);
+    t.checkExpect(testGraph.getCell(4, 4) != null, true);
+    t.checkExpect(testGraph.getCell(2, 2) != null, true);
   }
 
   void testBoardSwap(Tester t) {
@@ -1479,111 +1718,359 @@ class TestMineSweeper {
     t.checkExpect(testList.get(1), testCell1);
   }
 
-  void testBoardFisherYatesShuffle(Tester t) {
-    // TODO
-  }
-
-  void testBoardInitializeMines(Tester t) {
-    // TODO
-  }
-
   void testConstPropsDetermineImageFromCell(Tester t) {
-    // TODO
+    Cell numberedCell = new Cell();
+    numberedCell.revealed = true;
+    numberedCell.numOfMinesAdjacent = 8;
+
+    Cell unrevealedCell = new Cell();
+    unrevealedCell.revealed = false;
+
+    Cell flag = new Cell();
+    flag.flagged = true;
+
+    Cell detonatedMine = new Cell();
+    detonatedMine.revealed = true;
+    detonatedMine.hasMine = true;
+
+    t.checkExpect(ConstProps.determineImageFromCell(numberedCell), ConstProps.eightAdjMines);
+    t.checkExpect(ConstProps.determineImageFromCell(unrevealedCell), ConstProps.unknownAdjMines);
+    t.checkExpect(ConstProps.determineImageFromCell(flag), ConstProps.flag);
+    t.checkExpect(ConstProps.determineImageFromCell(detonatedMine), ConstProps.detonatedMine);
   }
 
   void testConstPropsGameLostDetermineImageFromCell(Tester t) {
-    // TODO
+    Cell numberedCell = new Cell();
+    numberedCell.revealed = true;
+    numberedCell.numOfMinesAdjacent = 8;
+
+    Cell unrevealedCell = new Cell();
+    unrevealedCell.revealed = false;
+
+    Cell flag = new Cell();
+    flag.flagged = true;
+
+    Cell detonatedMine = new Cell();
+    detonatedMine.revealed = true;
+    detonatedMine.hasMine = true;
+
+    Cell unflaggedMine = new Cell();
+    unflaggedMine.flagged = false;
+    unflaggedMine.hasMine = true;
+
+    Cell flaggedMine = new Cell();
+    flaggedMine.flagged = true;
+    flaggedMine.hasMine = true;
+
+    t.checkExpect(ConstProps.gameLostDetermineImageFromCell(numberedCell), ConstProps.eightAdjMines);
+    t.checkExpect(ConstProps.gameLostDetermineImageFromCell(unrevealedCell), ConstProps.unknownAdjMines);
+    t.checkExpect(ConstProps.gameLostDetermineImageFromCell(flag), ConstProps.flag);
+    t.checkExpect(ConstProps.gameLostDetermineImageFromCell(detonatedMine), ConstProps.detonatedMine);
+    t.checkExpect(ConstProps.gameLostDetermineImageFromCell(unflaggedMine), ConstProps.unflaggedMine);
+    t.checkExpect(ConstProps.gameLostDetermineImageFromCell(flaggedMine), ConstProps.flaggedMine);
   }
 
   void testMineSweeperWorldMakeScene(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldScene testScene = testWorld.makeScene();
+    t.checkExpect(testScene.height, pixelHeight);
+    t.checkExpect(testScene.width, pixelWidth);
   }
 
   void testMineSweeperWorldInitializeWorldScene(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldScene testScene = testWorld.initializeWorldScene();
+    t.checkExpect(testScene.height, pixelHeight);
+    t.checkExpect(testScene.width, pixelWidth);
   }
 
   void testMineSweeperWorldCreateScoreboardTopBorder(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldImage testImage = testWorld.createScoreboardTopBorder();
+    t.checkExpect(testImage.getWidth(), ConstProps.numberedTileWidthInPixels * tileWidth);
   }
 
   void testMineSweeperWorldCreateScoreboardBottomBorder(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldImage testImage = testWorld.createScoreboardBottomBorder();
+    t.checkExpect(testImage.getWidth(), ConstProps.numberedTileWidthInPixels * tileWidth);
   }
 
   void testMineSweeperWorldPow(Tester t) {
-    // TODO
+    t.checkExpect(MineSweeperWorld.pow(123, 2), 15129);
+    t.checkExpect(MineSweeperWorld.pow(2, 0), 1);
   }
 
   void testMineSweeperWorldGetNthDigit(Tester t) {
-    // TODO
+    t.checkExpect(MineSweeperWorld.getNthDigit(321, 1), 3);
+    t.checkExpect(MineSweeperWorld.getNthDigit(321, 2), 2);
+    t.checkExpect(MineSweeperWorld.getNthDigit(321, 3), 1);
   }
 
   void testMineSweeperWorldCreateScoreboardMineCounter(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldImage testImage = testWorld.createScoreboardMineCounter();
+    t.checkExpect(testImage.getWidth(), ConstProps.mineCounterWidth);
+    t.checkExpect(testImage.getHeight(), ConstProps.mineCounterHeight);
   }
 
   void testMineSweeperWorldCreateScoreboardTimer(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldImage testImage = testWorld.createScoreboardTimer();
+    t.checkExpect(testImage.getWidth(), ConstProps.scoreboardTimerWidth);
+    t.checkExpect(testImage.getHeight(), ConstProps.scoreBoardTimerHeight);
   }
 
   void testMineSweeperWorldCreateScoreboard(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldImage testImage = testWorld.createScoreboard();
+    t.checkExpect(testImage.getWidth(), ConstProps.scoreboardLeftBorderSegmentWidth
+        + (ConstProps.numberedTileWidthInPixels * tileWidth) + ConstProps.tileRightBorderSegmentWidth);
+    t.checkExpect(testImage.getHeight(), ConstProps.scoreboardTopBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardBottomBorderSegmentHeight);
   }
 
   void testMineSweeperWorldCreateLostScoreboard(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldImage testImage = testWorld.createLostScoreboard();
+    t.checkExpect(testImage.getWidth(), ConstProps.scoreboardLeftBorderSegmentWidth
+        + (ConstProps.numberedTileWidthInPixels * tileWidth) + ConstProps.tileRightBorderSegmentWidth);
+    t.checkExpect(testImage.getHeight(), ConstProps.scoreboardTopBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardBottomBorderSegmentHeight);
   }
 
   void testMineSweeperWorldCreateTileRows(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldImage testImage = testWorld.createTileRows();
+    t.checkExpect(testImage.getWidth(), (ConstProps.numberedTileWidthInPixels * tileWidth)
+        + ConstProps.tileLeftBorderSegmentWidth + ConstProps.tileRightBorderSegmentWidth);
+    t.checkExpect(testImage.getHeight(), (ConstProps.numberedTileHeightInPixels * tileHeight));
   }
 
   void testMineSweeperWorldCreateLostTileRows(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldImage testImage = testWorld.createLostTileRows();
+    t.checkExpect(testImage.getWidth(), (ConstProps.numberedTileWidthInPixels * tileWidth)
+        + ConstProps.tileLeftBorderSegmentWidth + ConstProps.tileRightBorderSegmentWidth);
+    t.checkExpect(testImage.getHeight(), (ConstProps.numberedTileHeightInPixels * tileHeight));
   }
 
   void testMineSweeperWorldCreateBottomBorder(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldImage testImage = testWorld.createBottomBorder();
+    t.checkExpect(testImage.getWidth(), (ConstProps.numberedTileWidthInPixels * tileWidth)
+        + ConstProps.tileBottomBorderLeftCornerWidth + ConstProps.tileBottomBorderRightCornerWidth);
+    t.checkExpect(testImage.getHeight(), ConstProps.tileBottomBorderLeftCornerHeight);
   }
 
   void testMineSweeperWorldCreateGameBoardImage(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldImage testImage = testWorld.createGameBoardImage();
+    t.checkExpect(testImage.getWidth(), (ConstProps.numberedTileWidthInPixels * tileWidth)
+        + ConstProps.tileBottomBorderLeftCornerWidth + ConstProps.tileBottomBorderRightCornerWidth);
+    t.checkExpect(testImage.getHeight(),
+        ConstProps.tileBottomBorderSegmentHeight + (ConstProps.numberedTileHeightInPixels * tileHeight)
+            + ConstProps.scoreboardBottomBorderSegmentHeight + ConstProps.heightScoreboardBackground
+            + ConstProps.scoreboardTopBorderSegmentHeight);
   }
 
   void testMineSweeperWorldCreateLostGameBoardImage(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    WorldImage testImage = testWorld.createLostGameBoardImage();
+    t.checkExpect(testImage.getWidth(), (ConstProps.numberedTileWidthInPixels * tileWidth)
+        + ConstProps.tileBottomBorderLeftCornerWidth + ConstProps.tileBottomBorderRightCornerWidth);
+    t.checkExpect(testImage.getHeight(),
+        ConstProps.tileBottomBorderSegmentHeight + (ConstProps.numberedTileHeightInPixels * tileHeight)
+            + ConstProps.scoreboardBottomBorderSegmentHeight + ConstProps.heightScoreboardBackground
+            + ConstProps.scoreboardTopBorderSegmentHeight);
   }
 
   void testMineSweeperWorldOnTick(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    testWorld.onTick();
   }
 
   void testMineSweeperWorldFloodFill(Tester t) {
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
     // TODO
   }
 
   void testMineSweeperWorldOnMousePressed(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    testWorld.onMousePressed(new Posn(0, 0), "LeftButton");
+    t.checkExpect(testWorld.mouseClicked, true);
   }
 
   void testMineSweeperWorldOnMouseReleased(Tester t) {
-    // TODO
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
+    testWorld.onMouseReleased(new Posn(0, 0), "LeftButton");
+    t.checkExpect(testWorld.mouseClicked, false);
   }
 
   void testMineSweeperWorldOnMouseClicked(Tester t) {
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
     // TODO
   }
 
   void testMineSweeperWorldGameWon(Tester t) {
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
     // TODO
   }
 
   void testMineSweeperWorldGameLost(Tester t) {
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
     // TODO
   }
 
   void testMineSweeperWorldWorldEnds(Tester t) {
+    int tileWidth = 9;
+    int tileHeight = 9;
+    int pixelWidth = (tileWidth * ConstProps.numberedTileWidthInPixels) + ConstProps.tileLeftBorderSegmentWidth
+        + ConstProps.tileRightBorderSegmentWidth;
+    int pixelHeight = (tileHeight * ConstProps.numberedTileHeightInPixels)
+        + ConstProps.tileBottomBorderSegmentHeight + ConstProps.scoreboardBottomBorderSegmentHeight
+        + ConstProps.heightScoreboardBackground + ConstProps.scoreboardTopBorderSegmentHeight;
+    MineSweeperWorld testWorld = new MineSweeperWorld(tileWidth, pixelWidth, tileHeight, pixelHeight, 1, 0.1);
     // TODO
   }
 
